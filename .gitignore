@@ -4,6 +4,8 @@
 /node_modules
 /.pnp
 .pnp.js
+pakage-lock.json
+pakage.json
 
 # testing
 /coverage
