@@ -20,7 +20,7 @@ const wrapper = css`
 
 const content = css`
   flex: 1;
-  padding-bottom: 120px;
+  padding-bottom: 90px;
   min-height: 810px;
 `;
 
