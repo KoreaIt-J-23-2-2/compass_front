@@ -86,7 +86,7 @@ function AcademyInfo(props) { //교육청 코드, 학원코드, 학원 이름 �
             getLikeState.refetch();
             likeCountOfInfo.refetch();
         } catch(error) {
-            console.log(error)
+            console.error(error);
         }
     }
     
