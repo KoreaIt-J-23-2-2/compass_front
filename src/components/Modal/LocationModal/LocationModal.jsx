@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 /** @jsxImportSource @emotion/react */
 import * as S from "./Style"
+import * as GS from "../../../styles/Global/Common"
 import ReactModal from 'react-modal';
 import { useQuery } from 'react-query';
 import { instance } from '../../../api/config/instance';
@@ -87,7 +88,7 @@ function LocationModal({ modalIsOpen, setModalIsOpen, enableBodyScroll}) {
 
     return (
         <ReactModal isOpen={modalIsOpen} onRequestClose={closeModal} css={S.SLayout}>
-            <div>지역 선택</div>
+            <div css={S.STitle}>지역 선택</div>
             <div css={S.SListContainer}>
                 <ul css={S.SEducationOfficeList}>
                     {educationOfficeOptions.map((option) => (
@@ -120,8 +121,8 @@ function LocationModal({ modalIsOpen, setModalIsOpen, enableBodyScroll}) {
                 </ul>
             </div>
             <div css={S.ButtonContainer}>
-                <button onClick={handleResetButton}>초기화</button>
-                <button onClick={closeModal}>선택</button>
+                <button onClick={handleResetButton} css={GS.SButton}>초기화</button>
+                <button onClick={closeModal} css={GS.SButton}>선택</button>
             </div>
             
         </ReactModal>

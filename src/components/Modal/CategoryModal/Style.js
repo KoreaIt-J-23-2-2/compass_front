@@ -1,7 +1,10 @@
 import { css } from '@emotion/react';
 
 export const SLayout = css`
-    margin: 0 auto; 
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     border: 1px solid #dbdbdb;
     border-radius: 10px;
     padding: 30px;
@@ -11,7 +14,10 @@ export const SLayout = css`
 `;
 
 export const STitle = css`
-    font-size: 20px;
+    border-bottom: 2px solid #dbdbdb;
+    padding-bottom: 20px;
+    font-size: 22px;
+    font-weight: 500;
 `;
 
 export const SListContainer = css`

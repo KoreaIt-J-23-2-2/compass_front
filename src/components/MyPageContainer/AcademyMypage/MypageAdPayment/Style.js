@@ -1,10 +1,55 @@
 import { css } from '@emotion/react';
 /** @jsxImportSource @emotion/react */
 
-export const SComment = css`
-    margin: 30px 20px 10px;
-    font-size: 16px;
+export const SProductContainer = css`
+    display: flex;
+    align-items: center;
 `;
+
+export const SProductLayout = css`
+    text-align: left;
+    margin: 0px 10px 0px 10px;
+    border: 1px solid black;
+    border-radius: 10px;
+    padding: 20px;
+    width: 250px;
+    height: 220px;
+    background-color: transparent;
+    cursor: pointer;
+`;
+
+export const SProductImgBox = css`
+    position: relative;
+    margin-bottom: 10px;
+    border: 1px solid black;
+    border-radius: 10px;
+    width: 200px;
+    height: 100px;
+`;
+
+export const SProductImg = css`
+    border-radius: 10px;
+    display: flex;
+    width: 200px;
+    height: 100px;
+    z-index: 0;
+`;
+
+export const SProductImgText = css`
+        position: absolute;
+        top: 50px;
+        left: 60px;
+        color: red;
+        font-size: 20px;
+        font-weight: 1000;
+        z-index: 1;
+`;
+
+export const SProductDetail = css`
+    position: relative;
+    top: auto;
+`;
+
 
 export const STable = css`
     margin: 0 20px;
@@ -21,6 +66,7 @@ export const STable = css`
         vertical-align: middle;
         text-align: center;
         overflow: auto;
+        cursor: default;
     }
 `;
 
@@ -53,8 +99,4 @@ export const SPageNumbers = css`
             background-color: #92c2f4;
         }
     }
-`;
-
-export const SAcaNm = css`
-    cursor: pointer;
 `;

@@ -1,37 +1,43 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { css } from '@emotion/react';
 /** @jsxImportSource @emotion/react */
 import * as S from "./Style";
 import * as GS from "../../../../../styles/Global/Common"
 import { instance } from '../../../../../api/config/instance';
 import { useQuery, useQueryClient } from 'react-query';
-import AgeOptions from '../../../../FindAcademiesSidebar/AgeOptions/AgeOptions';
-import ConvenienceOptions from '../../../../FindAcademiesSidebar/ConvenienceOptions/ConvenienceOptions';
+import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
+import { storage } from '../../../../../api/firebase/firebase';
+import { Line } from 'rc-progress';
 
 function DetailMyAcademy({ type, selectedAcademy }) {
 
     const queryClient = useQueryClient();
+    const principal = queryClient.getQueryState("getPrincipal");
 
-    const [ newAcademyInfo, setNewAcademyInfo ] = useState({
-        "academy": "",
-        "academyInfo": "",
-        "ageRange": [],
-        "convenienceInfo": [],
+    const academyInfo = {
+        academyInfoId: null,
+        ACADEMY_ID: selectedAcademy.academyId,
+        userId: principal.data.data.userId,
+        logoImg: null,
+        classSize: null,
+        coursePeriod: null,
+        purpose: null,
+        homePage: null,
+        phone: null
+    }
+    
+    const [ academyDetailInfo, setAcademyDetailInfo ] = useState({
+        "academyInfo": {},
+        "age": [],
+        "convenience": [],
         "classInfo": []
-    })
+    });
 
-    const [ academyData, setAcademyData ] = useState();   // 학원 정보 저장하는 상태 변수
+    const [ newAcademyDetailInfo, setNewAcademyDetailInfo ] = useState(academyDetailInfo)
 
     const [tableData, setTableData] = useState([
-        { id: 1, courseName: '', price: '' }, // 초기에 하나의 행을 가진 배열로 시작
+        { id: 1, classInfoId: '', className: '', classPrice: '' }, // 초기에 하나의 행을 가진 배열로 시작
     ]);
-    
-    const addRow = () => {
-        setTableData([
-            ...tableData,
-            { id: tableData.length + 1, courseName: '', price: '' },
-        ]);
-    };
 
     const [ ageOptions, setAgeOptions ] = useState([]);
     const [ convenienceOptions, setConvenienceOptions ] = useState([]);
@@ -39,8 +45,10 @@ function DetailMyAcademy({ type, selectedAcademy }) {
     const [ selectedAgeOptions, setSelectedAgeOptions ] = useState([]);
     const [ selectedConvenienceOptions, setSelectedConvenienceOptions ] = useState([]);
 
+    const [ logoImgProgressPercent, setLogoImgProgressPercent ] = useState(0);
+
     // 학원 정보 가져오기
-    const getAcademy = useQuery(["getAcademy"], async () => {
+    const getAcademy = useQuery(["getAcademy", selectedAcademy], async () => {
         try {
             const options = {
                 params: {
@@ -62,21 +70,32 @@ function DetailMyAcademy({ type, selectedAcademy }) {
         retry: 0,
         refetchOnWindowFocus: false,
         onSuccess: response => {
-            setAcademyData(response?.data);
-            setNewAcademyInfo({
-                "academy": response.data.academy,
-                "academyInfo": response.data.academyInfo,
-                "ageRange": response.data.ageRange,
-                "convenienceInfo": response.data.convenienceInfo,
+            setAcademyDetailInfo({
+                "academyInfo": response.data.academyInfo ? response.data.academyInfo : academyInfo,
+                "age": response.data.age,
+                "convenience": response.data.convenience,
                 "classInfo": response.data.classInfo
-            })
-            setSelectedAgeOptions(response.data.ageRange);
-            setSelectedConvenienceOptions(response.data.convenienceInfo);
+            });
+            setNewAcademyDetailInfo({
+                "academyInfo": !!response.data.academyInfo ? response.data.academyInfo : academyInfo,
+                "age": response.data.age,
+                "convenience": response.data.convenience,
+                "classInfo": response.data.classInfo
+            });
+
+            setSelectedAgeOptions(response.data.age.map(option => {
+                return { value: option.ageId, label: option.ageRange }
+            }));
+            setSelectedConvenienceOptions(response.data.convenience.map(option => {
+                return { value: option.convenienceId, label: option.convenienceName }
+            }));
+
             setTableData(
                 response.data.classInfo.map((classItem, index) => ({
                     id: index + 1,
-                    courseName: classItem.class_name,
-                    price: classItem.class_price
+                    classInfoId: classItem.classInfoId,
+                    className: classItem.className,
+                    classPrice: classItem.classPrice
                 }))
             );
         }
@@ -115,65 +134,81 @@ function DetailMyAcademy({ type, selectedAcademy }) {
             }))
         }
     });
+
+    const handleImgInputChange = (e) => {
+        const file = e.target.files[0];
+        //firebase에 저장
+        const storageRef = ref(storage, `logoImg/${selectedAcademy.academyId}/logoImg.jpg`);    // 해당 파일의 이름으로 firebase의 storage에 저장됨
+        const uploadTask = uploadBytesResumable(storageRef, file);        // 파일 업로드가 실행됨
+        uploadTask.on(          //업로드가 시작되면
+            "state_changed",    //파일이 변경되고 있을 때
+            (snapshot) => {     //파일 업로드 대기 중 프로그레스 바 적용할 때 사용
+                // 증가하는 %가 들어있음
+                setLogoImgProgressPercent(Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100));
+            },
+            (error) => {        //업로드 실패할 경우
+                console.error(error);
+            },
+            () => { //업로드가 완료되었을 경우
+                getDownloadURL(storageRef).then(downloadUrl => {    //방금전 성공한 업로드 경로를 가져옴
+                    setNewAcademyDetailInfo({
+                        ...newAcademyDetailInfo, 
+                        "academyInfo": {
+                            ...newAcademyDetailInfo.academyInfo,
+                            "logoImg": downloadUrl
+                        }
+                    });
+                })
+            }
+        )
+    }
     
     const handleInfoInputChange = (e) => {
-        setNewAcademyInfo({
-            ...newAcademyInfo,
+        setNewAcademyDetailInfo({
+            ...newAcademyDetailInfo,
             "academyInfo": {
-                ...newAcademyInfo.academyInfo,
+                ...newAcademyDetailInfo.academyInfo,
                 [e.target.name]: e.target.value
             }
         });
     };
 
     const handleCheckboxChange = (option, optionType) => {
-        const updatedSelectedOptions = optionType === 'age'
-            ? [...selectedAgeOptions]
-            : [...selectedConvenienceOptions];
-      
-        const optionIndex = updatedSelectedOptions.indexOf(option.label);
-      
-        if (optionIndex !== -1) {
-            // 이미 선택된 항목일 경우 제거
-            updatedSelectedOptions.splice(optionIndex, 1);
-        } else {
-            // 선택되지 않은 항목일 경우 추가
-            updatedSelectedOptions.push(option.label);
-        }
-        
+        const optionId = option.value;
+        const optionName = option.label;
+    
         if (optionType === 'age') {
+            const updatedSelectedOptions = selectedAgeOptions.map(({ value }) => value).includes(optionId)
+                ? selectedAgeOptions.filter(({ value }) => value !== optionId)
+                : [...selectedAgeOptions, { value: optionId, label: optionName }];
             setSelectedAgeOptions(updatedSelectedOptions);
-            setNewAcademyInfo({
-                ...newAcademyInfo,
-                ageRange: updatedSelectedOptions,
-            });
+    
+            setNewAcademyDetailInfo((prev) => ({
+                ...prev,
+                age: updatedSelectedOptions.map(({ value, label }) => ({ ageId: value, ageRange: label })),
+            }));
         } else {
+            const updatedSelectedOptions = selectedConvenienceOptions.map(({ value }) => value).includes(optionId)
+                ? selectedConvenienceOptions.filter(({ value }) => value !== optionId)
+                : [...selectedConvenienceOptions, { value: optionId, label: optionName }];
+    
             setSelectedConvenienceOptions(updatedSelectedOptions);
-            setNewAcademyInfo({
-                ...newAcademyInfo,
-                convenienceInfo: updatedSelectedOptions,
-            });
+    
+            setNewAcademyDetailInfo((prev) => ({
+                ...prev,
+                convenience: updatedSelectedOptions.map(({ value, label }) => ({ convenienceId: value, convenienceName: label })),
+            }));
         }
-    };
-
-    const handleClassInputChange = (id, fieldName, value) => {
-        const updatedTableData = tableData.map((row) =>
-            row.id === id ? { ...row, [fieldName]: value } : row
-        );
-        setTableData(updatedTableData);
     };
     
     const handleEditBtnClick = async () => {
         try {
-            const updatedClassInfo = tableData.map((row) => ({
-                class_name: row.courseName,
-                class_price: row.price,
-            }));
-    
-            setNewAcademyInfo((prev) => ({
-                ...prev,
-                classInfo: updatedClassInfo,
-            }));
+            const isAnyFieldEmpty = tableData.some((row) => !row.className || !row.classPrice);
+
+            if (isAnyFieldEmpty) {
+                alert('수업 과정에 빈 값이 없도록 모두 입력하세요!');
+                return;
+            }
 
             const option = {
                 headers: {
@@ -181,15 +216,65 @@ function DetailMyAcademy({ type, selectedAcademy }) {
                 }
             }
 
-            await instance.put("/academy", newAcademyInfo, option);
-
-            console.log(academyData)
-            console.log(newAcademyInfo)
-            console.log(ageOptions)
+            if(academyDetailInfo?.academyInfo?.academyInfoId === null) {   // academyInfoTb에 저장되지 않은 경우 insert 해줘야 함.
+                await instance.post(`/academyInfo/${selectedAcademy.academyId}`, newAcademyDetailInfo, option);
+            } else {
+                if(JSON.stringify(newAcademyDetailInfo) !== JSON.stringify(academyDetailInfo)) {    // 기존 academyInfo와 달라졌을 때만 수정
+                    await instance.put("/academy", newAcademyDetailInfo, option);
+                }
+            }
+            alert("수정이 완료되었습니다.");
+            getAcademy.refetch();
         } catch (error) {
+            alert("수정 오류");
             console.error(error);
         }
     }
+    
+    const addRow = () => {
+        setTableData([
+            ...tableData,
+            { id: tableData.length + 1, classInfoId: '', className: '', classPrice: '' },
+        ]);
+    };
+
+    const handleDeleteRow = (id) => {
+        const updatedTableData = tableData.filter((row) => row.id !== id);
+        // 다시 번호 매기기
+        const renumberedTableData = updatedTableData.map((row, index) => ({
+          ...row,
+          id: index + 1,
+        }));
+        setTableData(renumberedTableData);
+
+        // 삭제된 데이터를 newAcademyDetailInfo에서도 제거
+        const updatedClassInfo = renumberedTableData.map((row) => ({
+            className: row.className,
+            classPrice: row.classPrice,
+        }));
+
+        setNewAcademyDetailInfo((prev) => ({
+            ...prev,
+            classInfo: updatedClassInfo,
+        }));
+    };
+
+    const handleClassInputChange = (id, fieldName, value) => {
+        const updatedTableData = tableData.map((row) =>
+            row.id === id ? { ...row, [fieldName]: value } : row
+        );
+        setTableData(updatedTableData);
+    
+        const updatedClassInfo = updatedTableData.map((row) => ({
+            className: row.className,
+            classPrice: row.classPrice,
+        }));
+    
+        setNewAcademyDetailInfo((prev) => ({
+            ...prev,
+            classInfo: updatedClassInfo,
+        }));
+    };    
     
     return (
         <div>
@@ -211,17 +296,25 @@ function DetailMyAcademy({ type, selectedAcademy }) {
                     <button css={GS.SButton} onClick={handleEditBtnClick}>수정하기</button>
                 </div>
                 <div css={S.SInfoContainer}>
-                    <div css={S.SInfoBox}>
+                    <div>
                         <div css={S.STitleBox}>
                             <span>학원 정보</span>
                         </div>
-                        
-                        <div>로고 이미지<input type="file" /></div>
-                        <div>수강 인원<input type="text" name="class_size" value={newAcademyInfo?.academyInfo?.class_size} onChange={handleInfoInputChange}/></div>
-                        <div>수강 기간<input type="text" name="course_period" value={newAcademyInfo?.academyInfo?.course_period} onChange={handleInfoInputChange}/></div>
-                        <div>수강 목적<input type="text" name="purpose" value={newAcademyInfo?.academyInfo?.purpose} onChange={handleInfoInputChange}/></div>
-                        <div>홈페이지<input type="text" name="home_page" value={newAcademyInfo?.academyInfo?.home_page} onChange={handleInfoInputChange}/></div>
-                        <div>학원 전화번호<input type="text" name="phone" value={newAcademyInfo?.academyInfo?.phone} onChange={handleInfoInputChange}/></div>
+                        <div css={S.SImgBox}>
+                            로고 이미지
+                            <div>
+                                <img src={newAcademyDetailInfo.academyInfo.logoImg} alt="" />
+                                <input type="file" onChange={handleImgInputChange}/>
+                                {logoImgProgressPercent != 0 && logoImgProgressPercent != 100 && 
+                                    <Line percent={logoImgProgressPercent} strokeWidth={2} strokeColor="#67dce2" trailColor="#D3D3D3"/>
+                                }
+                            </div>
+                        </div>
+                        <div css={S.SInfoBox}>수강 인원<input type="text" name="classSize" value={newAcademyDetailInfo?.academyInfo?.classSize || ""} onChange={handleInfoInputChange}/></div>
+                        <div css={S.SInfoBox}>수강 기간<input type="text" name="coursePeriod" value={newAcademyDetailInfo?.academyInfo?.coursePeriod || ""} onChange={handleInfoInputChange}/></div>
+                        <div css={S.SInfoBox}>수강 목적<input type="text" name="purpose" value={newAcademyDetailInfo?.academyInfo?.purpose || ""} onChange={handleInfoInputChange}/></div>
+                        <div css={S.SInfoBox}>홈페이지<input type="text" name="homePage" value={newAcademyDetailInfo?.academyInfo?.homePage || ""} onChange={handleInfoInputChange}/></div>
+                        <div css={S.SInfoBox}>학원 전화번호<input type="text" name="phone" value={newAcademyDetailInfo?.academyInfo?.phone || ""} onChange={handleInfoInputChange}/></div>
                     </div>
                     <div>
                         <div css={S.STitleBox}>
@@ -232,7 +325,7 @@ function DetailMyAcademy({ type, selectedAcademy }) {
                             <div key={option.value}>
                                 <input
                                     type="checkbox"
-                                    checked={selectedAgeOptions.includes(option.label)}
+                                    checked={selectedAgeOptions.some((selectedOption) => selectedOption.value === option.value)}
                                     onChange={() => handleCheckboxChange(option, 'age')}
                                 />
                                 {option.label}
@@ -249,7 +342,7 @@ function DetailMyAcademy({ type, selectedAcademy }) {
                             <div key={option.value}>
                                 <input
                                     type="checkbox"
-                                    checked={selectedConvenienceOptions.includes(option.label)}
+                                    checked={selectedConvenienceOptions.some((selectedOption) => selectedOption.value === option.value)}
                                     onChange={() => handleCheckboxChange(option, 'convenience')}
                                 />
                                 {option.label}
@@ -262,6 +355,7 @@ function DetailMyAcademy({ type, selectedAcademy }) {
                             <span>학원 수업 정보</span>
                             <button onClick={addRow} css={GS.SButton}>추가</button>
                         </div>
+                        {tableData.length < 1 ? <div css={S.SEmpty}>수업 정보가 없습니다. 추가 버튼을 눌러 수업 정보를 추가해보세요!</div> : 
                         <table css={S.STable}>
                             <thead>
                                 <tr>
@@ -277,21 +371,21 @@ function DetailMyAcademy({ type, selectedAcademy }) {
                                     <td>{row.id}</td>
                                     <td>
                                         <input type="text"
-                                            value={row.courseName}
-                                            onChange={(e) => handleClassInputChange(row.id, 'courseName', e.target.value)}/>
+                                            value={row.className}
+                                            onChange={(e) => handleClassInputChange(row.id, 'className', e.target.value)}/>
                                     </td>
                                     <td>
                                         <input type="text"
-                                            value={row.price}
-                                            onChange={(e) => handleClassInputChange(row.id, 'price', e.target.value)}/>
+                                            value={row.classPrice}
+                                            onChange={(e) => handleClassInputChange(row.id, 'classPrice', e.target.value)}/>
                                     </td>
                                     <td>
-                                        <button css={GS.SButton}>삭제</button>
+                                        <button onClick={() => handleDeleteRow(row.id)} css={GS.SButton}>삭제</button>
                                     </td>
                                 </tr>
                             ))}
                             </tbody>
-                        </table>
+                        </table>}
                     </div>
                 </div>
             </div>

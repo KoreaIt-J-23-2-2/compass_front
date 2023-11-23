@@ -25,7 +25,6 @@ export const AcademyContainer = css`
         border: 1px solid #dbdbdb;
         border-radius: 5px;
         padding: 10px;
-        width: 200px;
         height: 40px;
         text-align: center;
     }

@@ -8,7 +8,7 @@ export const STopContainer = css`
     margin: 40px auto;
     border: none;
     border-radius: 50px;
-    padding: 30px 40px 20px;
+    padding: 30px 40px 40px;
     width: 800px;
     box-shadow: 4px 4px 10px 4px #dbdbdb;
 `;
@@ -31,10 +31,10 @@ export const SMatchButtonContainer = css`
     }
 
     & > input + label {
-        margin: 0px 25px;
+        margin: 0px 15px;
         border: 1px solid #dbdbdb;
         border-radius: 25px;
-        padding: 10px 30px;
+        padding: 10px 50px;
         background-color: white;
         font-size: 23px;
         box-shadow: 1px 5px 5px 1px #eee;
@@ -42,13 +42,11 @@ export const SMatchButtonContainer = css`
     }
 
     & > input:checked+label {
-        background-color: #92C2F4;
+        background-color: #5FA8D3;
         color: white;
     }
     
 `;
-
-
 
 export const SContainer = css`
     display: flex;
@@ -67,45 +65,37 @@ export const SContainerName = css`
     font-weight: 600;
 `;
 
-export const SModalBtn = css`
-    background-color: transparent;
-    border: transparent;
-    cursor: pointer;
-`;
-
-export const SModalContainer = css`
-    width: 100%;
-    height: 100%;
-    position: fixed;
-    top: 0;
-    left: 10;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: rgba(0, 0, 0, 0.5);
-    
-    &.hiden {
-        display: none;
-    }
-`;
-
-export const SModalDocument = css`
-    margin-bottom: 10px;
-`;
-
-export const SModalContent = css`
-    position: absolute;
-    background-color: #dbdbdb;
-    border-radius: 5px;
-    width: 300px;
-    height: 250px;
-    padding: 15px;
-`;
-
-export const SModalClosebtn = css`
+export const SInfoContainer = css`
     position: relative;
-    top: 30px;
-    left: 220px;
+    p {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 10px;
+        color: #aaa;
+        cursor: pointer;
+    }
+    
+    p svg {
+        margin-left: 5px;
+    }
+    
+    p:hover + div {
+        opacity: 1;
+    }
+    
+    div {
+        transition: all ease 0.3s;
+        position: absolute;
+        right: 0;
+        background-color: rgba(0, 0, 0, 0.1);
+        border-radius: 5px;
+        padding: 15px;
+        line-height: 20px;
+        width: 300px;
+        opacity: 0;
+        cursor: default;
+    }
 `;
 
 export const SSelectBoxContainer = css`
@@ -157,7 +147,7 @@ export const SButtonContainer = css`
 
 export const SSpanContainer = css`
     margin: 10px auto;
-    width: 600px;
+    width: 500px;
 
     & > span {
         color: #999;
@@ -167,10 +157,10 @@ export const SSpanContainer = css`
 export const SSubmitButton = css`
     border: 1px solid #dbdbdb;
     border-radius: 20px;
+    padding: 5px 0;
     width: 500px;
     font-size: 20px;
-    height: 40px;
-    background-color: #92C2F4;
+    background-color: #5FA8D3;
     color: white;
     font-size: 23px;
     box-shadow: 1px 5px 5px 1px #eee;

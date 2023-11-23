@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 /** @jsxImportSource @emotion/react */
 import * as S from "./Style"
@@ -16,11 +16,21 @@ function Header(props) {
 
     const [view, setView] = useState(false); 
 
-    const [ isOpen, setIsOpen ] = useState(false);
+    const dropdownRef = useRef(null);
 
-    const handleDropdownBtnOnClick = () => {
-        setIsOpen(!isOpen);
-    }
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setView(false);
+            }
+        };
+
+        document.addEventListener('click', handleClickOutside);
+
+        return () => {
+            document.removeEventListener('click', handleClickOutside);
+        };
+    }, [dropdownRef]);
 
     const handleLogoutOnClick = () => {
         if(window.confirm("로그아웃 하시겠습니까?")) {
@@ -51,8 +61,8 @@ function Header(props) {
             </div>
             <div css={S.SLoginButtonBox}>
                 {!!principalState?.data?.data ? (
-                    <div css={S.SDropLayout} onClick={() => {setView(!view)}}>
-                        반가워요, {principalState.data.data.nickname} 님!{" "}
+                    <div ref={dropdownRef} css={S.SDropLayout} onClick={() => {setView(!view)}}>
+                        <span>반가워요, {principalState.data.data.nickname}님!{" "}</span>
                         {view ? <AiOutlineUp/> : <AiOutlineDown/>}
                         {view && <ul css={S.SDropDown}>
                             <li><Link to="/account/mypage">마이페이지</Link></li>

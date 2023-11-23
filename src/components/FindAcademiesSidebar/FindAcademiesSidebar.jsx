@@ -21,7 +21,7 @@ function FindAcademiesSidebar(props) {
         <div css={S.FilterLayout}>
             <div css={S.InitialContainer}>
                 <h2>상세 검색</h2>
-                <button onClick={reset}>초기화</button>
+                <button onClick={reset}>필터 초기화</button>
             </div>
             <AgeOptions />
             <ConvenienceOptions />

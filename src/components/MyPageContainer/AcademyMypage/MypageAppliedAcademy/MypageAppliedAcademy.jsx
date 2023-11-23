@@ -17,6 +17,8 @@ function MypageAppliedAcademy(props) {
     const principal = queryClient.getQueryState("getPrincipal");
     
     const [ selectedAcademy, setSelectedAcademy ] = useState(null);
+    const [ selectedTarget, setSelectedTarget ] = useState(null);
+    const [ isApplicatedOpen, setIsApplicatedOpen ] = useState(false);
 
     const getAppliedAcademies = useQuery(["getAppliedAcademy", page], async () => {
         const option = {
@@ -32,8 +34,17 @@ function MypageAppliedAcademy(props) {
         }
     })
 
-    const handleAcademyOnClick = (academy) => {
-        setSelectedAcademy(academy);
+    const handleAcademyOnClick = (e, academy) => {
+        setSelectedAcademy((prevSelectedAcademy) => 
+            prevSelectedAcademy === academy ? null : academy
+        );
+
+        if (selectedTarget === e.target) {
+            setIsApplicatedOpen((prevIsOpen) => !prevIsOpen);
+            return;
+        }
+        setSelectedTarget(e.target);
+        setIsApplicatedOpen(true);
     }
 
     const pagination = () => {
@@ -99,7 +110,11 @@ function MypageAppliedAcademy(props) {
                                             <td>{academy.acaAsnum}</td>
                                             <td>{academy.acaNm}</td>
                                             <td>{academy.approvalStatus === 0 ? "승인 대기" : "승인 거절"}</td>
-                                            <td><button css={GS.SButton} onClick={() => handleAcademyOnClick(academy)}>선택</button></td>
+                                            <td>
+                                                <button css={GS.SButton} onClick={(e) => handleAcademyOnClick(e, academy)}>
+                                                    {selectedAcademy === academy ? '선택 해제' : '선택'}
+                                                </button>
+                                            </td>
                                         </tr>
                             })
                         }
@@ -109,7 +124,7 @@ function MypageAppliedAcademy(props) {
                     {pagination()}
                 </div>
                 <div>
-                    {!!selectedAcademy && 
+                    {isApplicatedOpen && !!selectedAcademy && 
                         (selectedAcademy?.approvalStatus > 0 ? <></> : 
                             selectedAcademy.approvalStatus === 0 ? 
                             <RetryMyAcademy type={"awaiting"} selectedAcademy={selectedAcademy}/> : 

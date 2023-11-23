@@ -69,14 +69,32 @@ export const SInfoContainer = css`
     }
 `;
 
-export const SInfoBox = css`
+export const SImgBox = css`
+    display: flex;
+    justify-content: space-between;
     & > div {
         display: flex;
-        justify-content: space-between;
-        display: flex;
-        align-items: center;
         margin-bottom: 10px;
+        width: 450px;
     }
+    & > div > img {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-right: 20px;
+        border: 1px solid #dbdbdb;
+        border-radius: 10px;
+        width: 80px;
+        height: 80px;
+        overflow: hidden;
+    }
+`;
+
+export const SInfoBox = css`
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
     & input {
         width: 450px;
     }
@@ -93,14 +111,12 @@ export const SCheckBox = css`
 
 export const SClassBox = css`
     margin-bottom: 10px;
-    & > div {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-`;
+    `;
 
 export const STitleBox = css`
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 10px;
     border-bottom: 1px solid #dbdbdb;
     padding-bottom: 10px;
@@ -131,4 +147,12 @@ export const STable = css`
         width: 100%;
         overflow-wrap: break-word;
     }
+`;
+
+export const SEmpty = css`
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    width: 100%;
 `;

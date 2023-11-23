@@ -1,13 +1,23 @@
 import { css } from '@emotion/react';
 
 export const SLayout = css`
-    margin: 0 auto; 
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     border: 1px solid #dbdbdb;
     border-radius: 10px;
     padding: 30px;
     width: 50%;
     max-width: 600px; 
     background-color: white;
+`;
+
+export const STitle = css`
+    border-bottom: 2px solid #dbdbdb;
+    padding-bottom: 20px;
+    font-size: 22px;
+    font-weight: 500;
 `;
 
 export const SListContainer = css`
@@ -33,7 +43,7 @@ export const SEducationOfficeListItem = css`
 export const SCategoryListItemSelected = css`
     background-color: #92C2F4;
     color: white;
-    font-weight: bold;
+    font-weight: 500;
 `;
 
 export const SDistrictOptionList = (isDistrictOptionShow) => css`

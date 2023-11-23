@@ -58,3 +58,22 @@ export const RoleContainer = css`
         padding: 12px;
     }
 `;
+
+export const InquiryBox = css`
+    display: flex;
+    align-items: center;
+
+    div {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-left: 10px;
+        border: 1px solid red;
+        border-radius: 50%;
+        padding: 0px;
+        width: 15px;
+        height: 15px;
+        color: white;
+        background-color: red;
+    }
+`;

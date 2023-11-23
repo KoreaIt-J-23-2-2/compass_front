@@ -4,7 +4,7 @@ import { css } from '@emotion/react';
 import * as S from "./Style"
 import { AiOutlineDown } from 'react-icons/ai'
 
-function SelectBtn({ children }) {
+function SelectModalBtn({ children }) {
 
     return (
         <div css={S.SSelectBox}>
@@ -13,4 +13,4 @@ function SelectBtn({ children }) {
     );
 }
 
-export default SelectBtn;
+export default SelectModalBtn;

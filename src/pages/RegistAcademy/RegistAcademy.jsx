@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import RootContainer from '../../components/RootContainer/RootContainer';
 /** @jsxImportSource @emotion/react */
 import * as S from "./Style"
-import { BsFillFileEarmarkArrowUpFill, BsInfoCircleFill } from 'react-icons/bs'
+import { BsInfoCircleFill } from 'react-icons/bs'
 import Select from 'react-select';
 import uploadPrecautionsImg from '../../assets/uploadPrecautions.png'
 import { instance } from '../../api/config/instance';
@@ -10,8 +10,6 @@ import { useQuery, useQueryClient } from 'react-query';
 import FindEducationOffice from '../../components/FindEducationOffice/FindEducationOffice';
 import { selectedAcademyState } from '../../store/RegistAtom';
 import { useRecoilState } from 'recoil';
-import { ref, getDownloadURL, uploadBytes, uploadBytesResumable } from 'firebase/storage';
-import { storage } from '../../api/firebase/firebase';
 import FileUpload from '../../components/FileUpload/FileUpload';
 
 
@@ -73,13 +71,15 @@ function RegistAcademy(props) {
         setSelectedEducationOffice(option.value);
     }
 
-    // const openModal = () => {
-    //     setIsModalOpen(true);
-    // }
+    const [ isModalOpen, setIsModalOpen ] = useState(false);
 
-    // const closeModal = () => {
-    //     setIsModalOpen(false);
-    // }
+    const openModal = () => {
+        setIsModalOpen(true);
+    }
+
+    const closeModal = () => {
+        setIsModalOpen(false);
+    }
     
     const handlesubmissionClick = async () => {
         try {
@@ -105,7 +105,7 @@ function RegistAcademy(props) {
     return (
         <RootContainer>
             <div css={S.STopContainer}>
-                <h1 css={S.SH1}>학원등록하기</h1>
+                <h1 css={S.SH1}>학원 등록하기</h1>
                 <span css={S.STopSpan}>사업자등록증의 상호명(법인명)과 학원명이 같나요?</span>
                 <div css={S.SMatchButtonContainer} >
                     <input 
@@ -143,23 +143,15 @@ function RegistAcademy(props) {
                     <div css={S.SContainer}>
                         <div css={S.SNameContainer}>
                             <span css={S.SContainerName}>사전확인서류 제출*</span>
-                            {/* <div>
-                                <p>사전확인 서류란?</p>
-                                <button css={S.SModalBtn} onClick={openModal}><BsInfoCircleFill /></button>
-                                {isModalOpen && (
-                                    <div css={`${S.SModalContainer}`}>
-                                        <div css={S.SModalContent}>
-                                            <ul css={S.SModalDocument}>사전확인서류란?</ul>
-                                            <li>학원 정보 관리 서비스를 사용하시기 전 학원 관리자님의 정보 확인을 위해 제출받는 서류입니다.<br></br>
-                                                신뢰성 있는 서비스를 제공하기 위해 사전확인서류로 학원 관리자임을 확인하고 있습니다.<br></br> 
-                                                학원명과 관리자 확인이 불가능한 경우 추가적인 확인 절차가 있을 수 있습니다.
-                                            </li>
-                                            <button css={S.SModalClosebtn} onClick={closeModal}>닫기</button>
-                                        </div>
-                                    </div>
-                                )}
-                            </div> */}
-                            <p>사전확인 서류란?<BsInfoCircleFill /></p>
+                            <div css={S.SInfoContainer}>
+                                <p>사전확인 서류란?<BsInfoCircleFill /></p>
+                                <div>
+                                    학원 정보 관리 서비스를 사용하시기 전 학원 관리자님의 정보 확인을 위해 제출받는 서류입니다.<br></br>
+                                    신뢰성 있는 서비스를 제공하기 위해 사전확인서류로 학원 관리자임을 확인하고 있습니다.<br></br> 
+                                    학원명과 관리자 확인이 불가능한 경우 추가적인 확인 절차가 있을 수 있습니다.
+                                </div>
+                            </div>
+                            
                         </div>
                         <FileUpload academyContent={academyContent} setAcademyContent={setAcademyContent}
                             uploadeFile={uploadeFile} setUploadeFile={setUploadeFile}/>
@@ -176,7 +168,6 @@ function RegistAcademy(props) {
                     </div>
                 </>
             }
-            
         </RootContainer>
     );
 }

@@ -7,6 +7,7 @@ import { useQuery, useQueryClient } from 'react-query';
 import { instance } from '../../../../api/config/instance';
 import { useNavigate, useParams } from 'react-router-dom';
 import DetailMyAcademy from './DetailMyAcademy/DetailMyAcademy';
+import { useEffect } from 'react';
 
 function MypageMyAcademy(props) {
 
@@ -17,6 +18,8 @@ function MypageMyAcademy(props) {
     const principal = queryClient.getQueryState("getPrincipal");
 
     const [ selectedAcademy, setSelectedAcademy ] = useState(null);
+    const [ selectedTarget, setSelectedTarget ] = useState(null);
+    const [ selectAcademyInfoOpen, setSelectAcademyInfoOpen ] = useState(false);
 
     const getMyAcademies = useQuery(["getMyAcademies", page], async () => {
         const option = {
@@ -32,8 +35,17 @@ function MypageMyAcademy(props) {
         }
     })
 
-    const handleAcademyOnClick = (academy) => {
-        setSelectedAcademy(academy);
+    const handleAcademyOnClick = (e, academy) => {
+        setSelectedAcademy((prevSelectedAcademy) => 
+            prevSelectedAcademy === academy ? null : academy
+        );
+    
+        if (selectedTarget === e.target) {
+            setSelectAcademyInfoOpen((prevIsOpen) => !prevIsOpen);
+            return;
+        }
+        setSelectedTarget(e.target);
+        setSelectAcademyInfoOpen(true);
     }
 
     const pagination = () => {
@@ -80,7 +92,7 @@ function MypageMyAcademy(props) {
         <div>
             <h2>🎒 나의 학원</h2>
             <div>
-                <div css={S.SComment}>나의 학원 정보를 수정해보세요!</div>
+                <div css={S.SComment}>나의 학원 정보를 수정해보세요! 학원명을 클릭하면 상세 페이지로 이동합니다.</div>
                 <table css={S.STable}>
                     <thead>
                         <tr>
@@ -94,10 +106,14 @@ function MypageMyAcademy(props) {
                             Array.isArray(getMyAcademies?.data?.data.academyRegistrations) && 
                             getMyAcademies?.data?.data.academyRegistrations.map(academy => {
                                 return  <tr key={academy.academyRegistrationId} 
-                                            style={{ fontWeight: selectedAcademy === academy ? 'bold' : 'normal', color: academy.approvalStatus < 0 ? 'red' : 'black'}}>
+                                            style={{ fontWeight: selectedAcademy === academy ? 'bold' : 'normal'}}>
                                             <td>{academy.acaAsnum}</td>
-                                            <td>{academy.acaNm}</td>
-                                            <td><button css={GS.SButton} onClick={() => handleAcademyOnClick(academy)}>선택</button></td>
+                                            <td css={S.SAcaNm} onClick={()=> {navigate(`/academy/info?ACADEMY_ID=${academy.academyId}`)}}>{academy.acaNm}</td>
+                                            <td>
+                                                <button css={GS.SButton} onClick={(e) => handleAcademyOnClick(e, academy)}>
+                                                    {selectedAcademy === academy ? '선택 해제' : '선택'}
+                                                </button>
+                                            </td>
                                         </tr>
                             })
                         }
@@ -107,7 +123,7 @@ function MypageMyAcademy(props) {
                     {pagination()}
                 </div>
                 <div>
-                    {!!selectedAcademy && <DetailMyAcademy selectedAcademy={selectedAcademy}/>}
+                    {selectAcademyInfoOpen && !!selectedAcademy && <DetailMyAcademy selectedAcademy={selectedAcademy}/>}
                 </div>
             </div>
         </div>

@@ -4,26 +4,31 @@ export const SearchLayout = css`
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 3px solid #92c2f4;
-    padding: 30px 10px;
+    border-bottom: 3px solid #5FA8D3;
+    padding: 30px 40px;
 
-    h1 {
-        font-size: 24px;
+    & > h1 {
+        font-size: 28px;
+        font-weight: 600;
     }
 `;
 
 export const SearchContainer = css`
     display: flex;
-
-    *:not(*:nth-of-type(2)) {
-        margin-left: 5px;
+    height: 50px;
+    & > div {
+        margin-left: 10px;
     }
 
     /* input이랑 button 나중에 global 지정하도록 */
-    & > input {
-        width: 300px;
+    & input {
         border-radius: 5px;
         border: 1px solid #dbdbdb;
+        outline: none;
+        padding: 10px;
+        width: 300px;
+        height: 100%;
+        font-size: 16px;
     } 
 
     & > button {
@@ -37,18 +42,22 @@ export const SearchContainer = css`
     }
 `;
 
-
 export const PageLayout = css`
     position: relative;
     display: flex;
-    padding: 0 10px;
+    /* padding: 0 10px; */
     width: 100%;
     height: 100%;
+    
+    & h3 {
+        font-size: 18px;
+        font-weight: 500;
+    }
 `;
 
 export const PageContainer = css`
-    width: 980px;
-    padding: 0 60px;
+    width: 900px;
+    padding: 0 40px 0 80px;
 `;
 
 export const InfoBox = css`
@@ -62,6 +71,7 @@ export const HeaderBox = css`
     display: flex;
     align-items: center;
     justify-content: space-between;
+    border-top: 1px solid #dbdbdb;
     padding: 15px 0;
 
     div {
@@ -80,13 +90,25 @@ export const ClassifyBox = css`
 export const UlBox = css`
     position: relative;
     display: flex;
-    justify-content: center;
     flex-wrap: wrap;
     padding-bottom: 10px;
     overflow: auto;
+    color: #888;
+    font-size: 15px;
+
+    strong {
+        margin-bottom: 10px;
+        border-bottom: 1px solid #dbdbdb;
+        padding-bottom: 10px;
+        font-size: 18px;
+        font-weight: 500;
+        text-align: center;
+        width: 100%;
+        color: black;
+    }
 
     li:nth-of-type(3n+2) {
-        margin: 0px 20px;
+        margin: 0px 30px 20px;
     }
 
     li:not(.recent):nth-of-type(n) {
@@ -97,18 +119,45 @@ export const UlBox = css`
 export const LiBox = css`
     display: flex;
     flex-direction: column;
+    align-items: center;
+    margin-bottom: 20px;
     border: 1px solid #dbdbdb;
     border-radius: 5px;
-    
-    padding: 10px;
-    width: 272px;
+    padding: 20px;
+    width: 240px;
+    box-shadow: 1px 5px 5px 1px #eee;
     cursor: pointer;
 
     img {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 10px;
+        border: 1px solid #dbdbdb;
         border-radius: 10px;
-        width: 250px;
+        width: 200px;
         height: 200px;
     }
+
+    & * {
+        margin-bottom: 5px;
+    }
+
+    & svg {
+        margin: 0;
+        margin-right: 3px;
+        font-size: 13px;
+    }
+
+    & div:nth-last-of-type(1) {
+        margin-bottom: 0;
+    }
+`;
+
+export const SAddress = css`
+    display: flex;
+    justify-content: center;
+    align-items: center;
 `;
 
 export const PageButtonContainer = css`
@@ -126,13 +175,48 @@ export const SRandomImg = css`
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-left: 10px;
+    margin-bottom: 10px;
     border-radius: 10px;
-    width: 230px;
-    height: 200px;/* 원하는 크기 설정 */
+    width: 200px;
+    height: 200px;
     & span {
         font-size: 50px;
         font-weight: 600;
         color: #fff;
+    }
+`;
+
+export const SAcademiesContainer = css`
+    display: flex;
+    flex-direction: column;
+    `
+
+export const SPageNumbers = css`
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+    width: 100%;
+
+    & button {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-right: 10px;
+        border: 1px solid #dbdbdb;
+        border-radius: 5px;
+        background-color: white;
+        width: 30px;
+        height: 30px;
+        cursor: pointer;
+
+        :disabled {
+            background-color: #eee;
+            cursor: default;
+        }
+
+        &.selected {
+            background-color: #92c2f4;
+        }
     }
 `;

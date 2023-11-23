@@ -4,7 +4,21 @@ import { css } from '@emotion/react';
 export const Common = css`
     * {
         box-sizing: border-box;
-        
+        font-family: 'IBM Plex Sans KR', sans-serif !important;
+    }
+
+    ::-webkit-scrollbar {
+        width: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        border-radius: 10px;
+        background: rgb(177, 194, 203);
+    }
+
+    ::-webkit-scrollbar-track {
+        -webkit-box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
+        background: rgba(177, 194, 203, .1);
     }
 `;
 

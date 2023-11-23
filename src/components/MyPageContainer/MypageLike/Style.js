@@ -5,14 +5,23 @@ export const UlBox = css`
     position: relative;
     display: flex;
     flex-wrap: wrap;
-    margin-bottom: 10px;
+    padding-bottom: 10px;
     overflow: auto;
 
-    li:nth-of-type(3n+2) {
-        margin: 0 auto;
+    strong {
+        border-bottom: 1px solid #dbdbdb;
+        padding-bottom: 10px;
+        margin-bottom: 10px;
+        font-size: 18px;
+        text-align: center;
+        width: 100%;
     }
 
-    li:nth-of-type(n) {
+    li:nth-of-type(3n+2) {
+        margin: 0px 10px 20px;
+    }
+
+    li:not(.recent):nth-of-type(n) {
         margin-bottom: 15px;
     }
 `;
@@ -20,29 +29,33 @@ export const UlBox = css`
 export const LiBox = css`
     display: flex;
     flex-direction: column;
+    align-items: center;
+    margin-bottom: 20px;
     border: 1px solid #dbdbdb;
     border-radius: 5px;
-    padding: 10px;
+    padding: 20px;
+    width: 255px;
     background-color: white;
-    font-size: 16px;
+    box-shadow: 1px 5px 5px 1px #eee;
     cursor: pointer;
 
     img {
-        margin-bottom: 5px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 10px;
+        border: 1px solid #dbdbdb;
         border-radius: 10px;
-        width: 230px;
-        height: 200px;
+        width: 210px;
+        height: 210px;
     }
 
-    strong {
-        margin: 5px 0;
-        font-weight: 600;
-        width: 230px;
-        word-wrap: break-word;
+    & * {
+        margin-bottom: 5px;
     }
 
-    div {
-        margin: 5px 0;
+    & div:nth-last-of-type(1) {
+        margin-bottom: 0;
     }
 `;
 
@@ -50,16 +63,13 @@ export const SRandomImg = css`
     display: flex;
     justify-content: center;
     align-items: center;
+    margin-bottom: 10px;
     border-radius: 10px;
-    width: 230px;
-    height: 200px;/* 원하는 크기 설정 */
+    width: 210px;
+    height: 210px;
     & span {
         font-size: 50px;
         font-weight: 600;
         color: #fff;
     }
-`;
-
-export const STitleName = css`
-    
 `;

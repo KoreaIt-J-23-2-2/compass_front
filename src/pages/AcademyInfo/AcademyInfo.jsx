@@ -27,6 +27,7 @@ function AcademyInfo(props) { //교육청 코드, 학원코드, 학원 이름 �
     const [ reviewData, setReviewData ] = useState();     // 리뷰 정보 저장하는 상태 변수
     const [ modifyButtonState, setModifyButtonState ] = useState(false);
 
+    const [ isAcademyRegistered, setIsAcademyRegistered ] = useState(false);    // 학원 관리자 등록 여부
     const [ color, setColor ] = useState();
     
     // 분야명의 "(대)" 문자열 자르기
@@ -146,13 +147,15 @@ function AcademyInfo(props) { //교육청 코드, 학원코드, 학원 이름 �
             <div css={S.SLayout}>
                 <div css={S.SHead}>
                     <div css={S.SAcademyInfoContainer}>
-                            <div css={[S.SAcademtLogo, { backgroundColor: color}]}>
-                                <span> {academyData?.academy.ACA_NM.replace(/\([^)]*\)/g, '') // 괄호와 그 안의 내용을 빈 문자열로 대체
-                                .match(/[ㄱ-ㅎ가-힣]/g) // 문자열에서 한글만 추출
-                                ?.slice(0, 2) // 추출한 한글 중 첫 두 글자 선택
-                                .join('')}
-                                </span>
-                            </div>
+                        {!getAcademy.isLoading && !!academyData?.academyInfo?.logoImg ? 
+                        <img css={S.SAcademtLogo} src={academyData?.academyInfo?.logoImg} alt="" /> : 
+                        <div css={[S.SAcademtLogo, { backgroundColor: color}]}>
+                            <span> {academyData?.academy.ACA_NM.replace(/\([^)]*\)/g, '') // 괄호와 그 안의 내용을 빈 문자열로 대체
+                            .match(/[ㄱ-ㅎ가-힣]/g) // 문자열에서 한글만 추출
+                            ?.slice(0, 2) // 추출한 한글 중 첫 두 글자 선택
+                            .join('')}
+                            </span>
+                        </div>}
                         <div css={S.SAcademyInfo}>
                             <div css={S.SAcademyName}>{academyData?.academy.ACA_NM}</div>
                             <div css={S.SAcademyLocation}><FaLocationDot/>{academyData?.academy.FA_RDNMA}</div>
@@ -182,7 +185,7 @@ function AcademyInfo(props) { //교육청 코드, 학원코드, 학원 이름 �
                         </label>
                     </div>
                 </div>
-                <div>
+                <div css={S.SBody}>
                     <div css={S.SIntroductionContainer} id='introduction'>
                         <h1 css={S.STitle}>학원소개</h1>
                         <div css={S.SIntroductions}>
@@ -243,11 +246,12 @@ function AcademyInfo(props) { //교육청 코드, 학원코드, 학원 이름 �
                     <div css={S.SClassInfo} id='classinfo'>
                         <h1 css={S.STitle}>학원 수업 정보</h1>
                         <div>
+                            {!!!academyData?.classInfo[0] ? <div css={S.SEmpty}>학원 수업 정보가 등록되지 않았습니다.</div> : 
                             <table css={S.STable}>
                                 <thead>
                                     <tr>
-                                        <td>과정</td>
-                                        <td>학원비</td>
+                                        <td>과정명</td>
+                                        <td>가격</td>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -261,7 +265,7 @@ function AcademyInfo(props) { //교육청 코드, 학원코드, 학원 이름 �
                                         :  <tr><td colSpan='2'>학원 수업 정보를 제공하지 않습니다.</td></tr>
                                     }
                                 </tbody>
-                            </table>
+                            </table>}
                         </div>
                     </div>
                 </div>
@@ -278,10 +282,10 @@ function AcademyInfo(props) { //교육청 코드, 학원코드, 학원 이름 �
                             <div>{likeCountOfInfo?.data?.data}</div>
                         </button>
                     }
-                    <Link to={"/academy/inquiry"} css={S.SinquiryButton}>
+                    <button css={S.SinquiryButton(isAcademyRegistered)} onClick={handleinquiryButton}>
                         <BsChatLeftTextFill css={S.SinquiryIcon}/>
                         문의
-                    </Link>
+                    </button>
                 </div>
             </div>
         </RootContainer>

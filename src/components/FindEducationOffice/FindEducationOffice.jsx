@@ -2,10 +2,12 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 /** @jsxImportSource @emotion/react */
 import { css } from '@emotion/react';
 import * as S from "./Style"
+import * as GS from "../../styles/Global/Common"
 import { useQuery } from 'react-query';
 import { instance } from '../../api/config/instance';
-import { atom, useRecoilState, useResetRecoilState } from 'recoil';
+import { useRecoilState } from 'recoil';
 import { selectedAcademyState } from '../../store/RegistAtom';
+import SearchBtn from '../Button/SearchBtn/SearchBtn';
 
 function FindEducationOffice({ educationOfficeCode }) {
     
@@ -109,8 +111,10 @@ function FindEducationOffice({ educationOfficeCode }) {
     return (
         <div css={S.SLayout}>
             <div css={S.SHeadContainer}>
-                <input type="text" onChange={handleAcademyNameInput} placeholder='학원명을 입력해주세요.'/>
-                <button onClick={handleSearchClick}>검색</button>
+                <div css={S.SInput}>
+                    <input type="text" onChange={handleAcademyNameInput} placeholder='학원명을 입력해주세요.'/>
+                </div>
+                <SearchBtn onClick={handleSearchClick}/>
             </div>
             <ul css={S.SBodyContainer}>
                 <li css={S.SList}>
@@ -125,7 +129,7 @@ function FindEducationOffice({ educationOfficeCode }) {
                             <div>{academy.ACA_ASNUM}</div>
                             <div>{academy.ADMST_ZONE_NM}</div>
                             <div>{academy.ACA_NM}</div>
-                            <div><button onClick={() => selectedChoiceClick(academy)}>선택</button></div>
+                            <div><button css={GS.SButton} onClick={() => selectedChoiceClick(academy)}>선택</button></div>
                         </li> 
                     );
                 })}

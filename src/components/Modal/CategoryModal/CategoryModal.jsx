@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useRecoilState } from 'recoil';
 /** @jsxImportSource @emotion/react */
 import * as S from "./Style"
+import * as GS from "../../../styles/Global/Common"
 import { instance } from '../../../api/config/instance';
 import { useQuery } from 'react-query';
 import ReactModal from 'react-modal';
@@ -125,8 +126,8 @@ function CategoryModal({ modalIsOpen, setModalIsOpen, enableBodyScroll }) {
                 </ul>
             </div>
             <div css={S.ButtonContainer}>
-                <button onClick={handleResetButton}>초기화</button>
-                <button onClick={closeModal}>선택</button>
+                <button onClick={handleResetButton} css={GS.SButton}>초기화</button>
+                <button onClick={closeModal} css={GS.SButton}>선택</button>
             </div>
             
         </ReactModal>

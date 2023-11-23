@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { css } from '@emotion/react';
 /** @jsxImportSource @emotion/react */
 import * as S from "../Style";
 import MyPageSidebar from '../MyPageSidebar';
@@ -11,12 +10,32 @@ import { instance } from '../../../api/config/instance';
 
 
 
-function StudentSidebar(props) {
+function StudentSidebar({ uncheckedAnswerCount, setUncheckedAnswerCount }) {
 
     const queryClient = useQueryClient();
     const principal = queryClient.getQueryState("getPrincipal");
     const likeCountOfMypage = queryClient.getQueryState("getLikeCountOfMypage");
-    const { likeId } = useParams();
+    const { likeId } = useParams(); 
+
+    const getUncheckedAnswerCount = useQuery(['getUncheckedAnswerCount'], async () => {
+        try {
+            const option = {
+                headers: {
+                    Authorization: localStorage.getItem("accessToken")
+                }
+            }
+            return await instance.get(`/inquiry/${principal?.data?.data.userId}/UncheckedAnswerCount`, option)
+        } catch (error) {
+            console.error(error);
+        }
+    },{
+        retry: 0,
+        refetchOnWindowFocus: false,
+        onSuccess: (data) => {
+            // uncheckedInquiryCount 값을 가져와서 상태 업데이트
+            setUncheckedAnswerCount(data.data);
+        }
+    })
 
     return (
         <MyPageSidebar role={'학생'}>
@@ -38,8 +57,11 @@ function StudentSidebar(props) {
                 <Link to='/account/mypage/appliedacademy/1'>
                     <div>🗒️ 학원 신청 목록</div>
                 </Link>
-                <Link to='/account/mypage/inquiry'>
-                    <div>📞 나의 학원 문의</div>
+                <Link to='/account/mypage/inquiry/1'>
+                    <div css={S.InquiryBox}>
+                        📞 나의 학원 문의 
+                        { uncheckedAnswerCount > 0 && <div>{uncheckedAnswerCount}</div>}
+                    </div>
                 </Link>
                 <Link to='/account/mypage/review'>
                     <div>📜 작성한 후기</div>

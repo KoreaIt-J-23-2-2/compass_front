@@ -8,15 +8,13 @@ import { useQuery, useQueryClient } from 'react-query';
 import { instance } from '../../../api/config/instance';
 import { useNavigate } from 'react-router-dom';
 
-
+function MypageLike(props) {
     // 랜덤 색상을 생성하는 함수
     const getRandomColor = () => {
     // 0부터 255 사이의 랜덤한 RGB 값 생성
     const randomColor = `rgb(${Math.floor(Math.random() * 127 + 128)}, ${Math.floor(Math.random() * 127 + 128)}, ${Math.floor(Math.random() * 127 + 128)})`;
     return randomColor;
     };
-
-function MypageLike(props) {
 
     const navigate = useNavigate();
 
@@ -51,17 +49,25 @@ function MypageLike(props) {
                         const academyNameWithoutParentheses = academy.ACA_NM.replace(/\([^)]*\)/g, ''); // "()"를 빈 문자열로 대체
                         const koreanChars = academyNameWithoutParentheses.match(/[ㄱ-ㅎ가-힣]/g); // 한글만 추출
                         const firstTwoKoreanChars = koreanChars ? koreanChars.slice(0, 2).join('') : '';
+                        const address = academy.FA_RDNMA.split(' ').slice(0, 2).join(' ');
+                        const realm =
+                            academy.REALM_SC_NM === '국제화'
+                                ? '외국어'
+                                : academy.REALM_SC_NM === '정보'
+                                ? 'IT'
+                                : academy.REALM_SC_NM.replace(/\(대\)/g, '').trim();
                         return  <li css={S.LiBox} className='recent' onClick={()=> {navigate(`/academy/info?ACADEMY_ID=${academy.ACADEMY_ID}`)}}>
-                            {academy.logo_img ? (
-                                <img src={academy.logo_img} alt={`${academy.ACA_NM}의 로고`}  />
+                            {academy.logoImg ? (
+                                <img src={academy.logoImg} alt={`${academy.ACA_NM}의 로고`}  />
                             ): (
                                 <div css={[S.SRandomImg, { backgroundColor: getRandomColor() }]}>
                                     <span>{firstTwoKoreanChars}</span>
                                 </div>
                             )}
-                                    <strong>{academy.ACA_NM}</strong>
-                                    <div>학원 설명</div>
-                                </li> 
+                                <strong>{academy.ACA_NM}</strong>
+                                    <div>{address}</div>
+                                    <div>{realm}</div>
+                            </li> 
                     })}
                 </ul>
             </div>
