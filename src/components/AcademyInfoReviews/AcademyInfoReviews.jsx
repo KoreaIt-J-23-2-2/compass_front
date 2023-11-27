@@ -12,7 +12,7 @@ import { useNavigate } from 'react-router-dom';
 import Pagination from '../Pagination/Pagination';
 import { Rating } from '@micahlt/react-simple-star-rating';
 
-function AcademyInfoReviews({ academyId, page }) {
+function AcademyInfoReviews({ academyId, page, academyData }) {
     const navigate = useNavigate();
 
     const queryClient = useQueryClient();
@@ -70,6 +70,9 @@ function AcademyInfoReviews({ academyId, page }) {
         try {
             // 사용자가 로그인되어 있고 이메일이 확인된 경우 확인
             if (principal.data && principal.data.data.enabled) {
+                if(principal.data.data.roleId === 2 && academyData.userId === userId){
+                    return alert("학원 관리자는 해당 학원에는 리뷰를 작성할 수 없습니다.")
+                }
                 const options = {
                     headers: {
                         Authorization: localStorage.getItem("accessToken")
