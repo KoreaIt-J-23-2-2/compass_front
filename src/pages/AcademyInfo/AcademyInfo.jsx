@@ -40,14 +40,6 @@ function AcademyInfo(props) { //교육청 코드, 학원코드, 학원 이름 �
     const searchParams = new URLSearchParams(location.search);
     const academyId = searchParams.get('ACADEMY_ID')
 
-    
-    const [ reviewWriteData, setReviewWriteData] = useState({
-        ACADEMY_ID: parseInt(academyId),
-        userId: userId,
-        score: "",
-        reviewContent: ""
-    })
-
     // 랜덤 색상을 생성하는 함수
     const getRandomColor = () => {
         // 0부터 255 사이의 랜덤한 RGB 값 생성
@@ -82,6 +74,28 @@ function AcademyInfo(props) { //교육청 코드, 학원코드, 학원 이름 �
             getRandomColor();
         }
     })
+
+    //리뷰 가져오기
+    const getReviews = useQuery(["getReviews", page], async () => {
+        // api, options를 get 요청
+        try {
+            const options = {
+                headers: {
+                    Authorization: localStorage.getItem("accessToken")
+                }
+            }
+            return await instance.get(`/academy/${academyId}/reviews/${page}`, options);
+        }catch(error) {
+            console.error(error);
+        }
+    },
+    {
+        retry: 0,
+        refetchOnWindowFocus: false,
+        onSuccess: response => {
+            setReviewData(response.data);
+        }
+    });
 
     useEffect(() => {   //페이지 스크롤에 따른 네비게이션바 이동
         const handleScroll = () => {
@@ -124,7 +138,7 @@ function AcademyInfo(props) { //교육청 코드, 학원코드, 학원 이름 �
                                 {academyData?.academy.FA_TELNO}</div>
                             <div css={S.SScoreAndReviewContainer}>
                                 <AiFillStar css={S.SAcademyStar}/> 
-                                별점 {reviewData?.reviewCount?.score_avg} · 학원후기({reviewData?.reviewCount?.review_count}개)
+                                별점 {reviewData?.reviewCount?.scoreAvg} · 학원후기({reviewData?.reviewCount?.reviewCount}개)
                             </div>
                         </div>
                     </div>
@@ -206,7 +220,7 @@ function AcademyInfo(props) { //교육청 코드, 학원코드, 학원 이름 �
                         </div>
                         {!!!academyData?.convenience[0] &&  <span>등록된 편의사항이 존재하지 않습니다.</span>}
                     </div>
-                    <AcademyInfoReviews academyId={academyId} page={page}/>
+                    <AcademyInfoReviews academyId={academyId} page={page} academyData={academyData?.academyInfo}/>
                     <AcademyInfoClass academyData={academyData} />
                 </div>
             </div>
