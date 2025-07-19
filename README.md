@@ -170,11 +170,11 @@ https://www.notion.so/bc3babdfb67544f3a07ad13bd6ce9a2a?v=30e68966d92344eca0545ce
 
 ```javascript
     const handleKaKaoLogin = () => {
-        window.location.href = "http://localhost:8080/oauth2/authorization/kakao";
+        window.location.href = "http://43.203.30.83/oauth2/authorization/kakao";
     }
 
     const handleNaverLogin = () => {
-        window.location.href = "http://localhost:8080/oauth2/authorization/naver";
+        window.location.href = "http://43.203.30.83/oauth2/authorization/naver";
     }
 ```
 - window.location.href를 통해 브라우저의 현재 위치를 해당 주소로 변경, 이 URL은 각각 카카오, 네이버 로그인을 처리하는 서버 엔드포인트로 이동
@@ -198,13 +198,13 @@ spring:
         registration:
           kakao:
             clientId: 2dc5c2ec61e5efeb6b952c1b5d381821
-            redirectUri: http://localhost:8080/login/oauth2/code/kakao
+            redirectUri: http://43.203.30.83/login/oauth2/code/kakao
             authorizationGrantType: authorization_code
             clientAuthenticationMethod: POST
             clientName: Kakao
           naver:
             clientId: i4eW_RUc74M3Ci96bJuG
-            redirectUri: http://localhost:8080/login/oauth2/code/naver
+            redirectUri: http://43.203.30.83/login/oauth2/code/naver
             authorizationGrantType: authorization_code
             clientAuthenticationMethod: POST
             clientName: Naver
@@ -2621,7 +2621,7 @@ public interface AccountMapper {
                     "<div>" +
                             "<h1>학습 나침반 이메일 인증 메일</h1>"+
                             "<p>이메일 인증을 완료하려면 아래의 버튼을 클릭하세요.</p>" +
-                            "<a href=\"http://localhost:8080/api/account/auth/email?token=" + token + "\">인증하기</a>" +
+                            "<a href=\"http://43.203.30.83/api/account/auth/email?token=" + token + "\">인증하기</a>" +
                     "</div>", "utf-8", "html"
             );
             javaMailSender.send(mimeMailMessage);       //설정한 메시지를 sender를 통해 전달함
@@ -2633,7 +2633,7 @@ public interface AccountMapper {
     }
 ```
 - generateAuthMailToken : 이메일 인증 토큰 발행(유효기간 - 5분)
-- http://localhost:8080/api/account/auth/email 로 a 태그 만들어서 인증하도록 한다.
+- http://43.203.30.83/api/account/auth/email 로 a 태그 만들어서 인증하도록 한다.
 
 <br/>
 

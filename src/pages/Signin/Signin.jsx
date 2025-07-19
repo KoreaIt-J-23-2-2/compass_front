@@ -11,11 +11,11 @@ import MainLogo from "../../assets/MainLogin2.png"
 function Signin(props) {
 
     const handleKaKaoLogin = () => {
-        window.location.href = "http://localhost:8080/oauth2/authorization/kakao";
+        window.location.href = "http://43.203.30.83/oauth2/authorization/kakao";
     }
 
     const handleNaverLogin = () => {
-        window.location.href = "http://localhost:8080/oauth2/authorization/naver";
+        window.location.href = "http://43.203.30.83/oauth2/authorization/naver";
     }
 
     return (
