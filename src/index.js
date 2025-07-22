@@ -17,7 +17,7 @@ const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <QueryClientProvider client={queryClient}>
     <RecoilRoot>
-      <BrowserRouter>
+      <BrowserRouter basename='/compass_front'>
       <ScrollToTop />
         <Global styles={Common} />
         <Reset />
