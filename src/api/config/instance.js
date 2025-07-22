@@ -1,5 +1,5 @@
 import axios from "axios";
 
 export const instance = axios.create({  // axios 공통 설정
-    baseURL: "http://43.203.30.83/api"
+    baseURL: "https://compassback-production.up.railway.app/api"
 })
