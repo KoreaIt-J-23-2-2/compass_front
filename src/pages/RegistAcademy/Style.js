@@ -58,7 +58,7 @@ export const SMatchButtonContainer = css`
 export const SContainer = css`
     display: flex;
     flex-direction: column;
-    margin: 40px auto;
+    margin: 0 auto 40px;
     border: none;
     border-radius: 50px;
     padding: 30px 40px;
@@ -138,7 +138,6 @@ export const SImgContainer = css`
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-top: -20px;
     width: 100%;
 `;
 

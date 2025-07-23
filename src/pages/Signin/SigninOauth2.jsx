@@ -1,18 +1,23 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useQueryClient } from 'react-query';
-import { Navigate, useSearchParams } from 'react-router-dom';
+import { useSearchParams, Navigate } from 'react-router-dom';
 
-function SigninOauth2(props) {  // /auth/oauth2/signin
-    // 서버로부터 redirection해서 들어온 token을 localStorage에 저장하는 과정
-    const [ searchParams ] = useSearchParams();
+function SigninOauth2() {
+    const [searchParams] = useSearchParams();
+    const [done, setDone] = useState(false);
     const queryClient = useQueryClient();
 
-    localStorage.setItem("accessToken", "Bearer " + searchParams.get("token"));
-    queryClient.refetchQueries(["getPrincipal"]);
+    useEffect(() => {
+        const token = searchParams.get("token");
+        if (token) {
+            localStorage.setItem("accessToken", "Bearer " + token);
+            queryClient.refetchQueries(["getPrincipal"]);
+        }
+        setDone(true); // 완료 후 리디렉트
+    }, [searchParams, queryClient]);
 
-    console.log("accessToken: ", searchParams.get("token"));
-
-    return <Navigate to={"/"} />
+    if (!done) return <div>로그인 처리 중입니다...</div>;
+    return <Navigate to="/" />;
 }
 
 export default SigninOauth2;
