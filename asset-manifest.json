@@ -1,0 +1,26 @@
+{
+  "files": {
+    "main.css": "/compass_front/static/css/main.71d9bc2e.css",
+    "main.js": "/compass_front/static/js/main.e5402f90.js",
+    "static/js/787.1f1706e1.chunk.js": "/compass_front/static/js/787.1f1706e1.chunk.js",
+    "static/media/학생.jpg": "/compass_front/static/media/학생.2346f267418417a48923.jpg",
+    "static/media/student.png": "/compass_front/static/media/student.902cfed88663195582d4.png",
+    "static/media/uploadPrecautions.png": "/compass_front/static/media/uploadPrecautions.8c7b0e23ca47824882ec.png",
+    "static/media/선생.png": "/compass_front/static/media/선생.04a2ca46e8af05c04c69.png",
+    "static/media/bookLoading.gif": "/compass_front/static/media/bookLoading.9918d70d370df0efa417.gif",
+    "static/media/no_results.png": "/compass_front/static/media/no_results.2d2c6ee352de3daf8a56.png",
+    "static/media/결제 이밍지.png": "/compass_front/static/media/결제 이밍지.962286a0992f5a89fca8.png",
+    "static/media/MainLogin2.png": "/compass_front/static/media/MainLogin2.7c27f9b9a438452e6ac3.png",
+    "static/media/Footer.ver1.png": "/compass_front/static/media/Footer.ver1.72a3352009891767df1e.png",
+    "static/media/Header-ver1.png": "/compass_front/static/media/Header-ver1.d301b255892edc82d803.png",
+    "static/media/naver login.png": "/compass_front/static/media/naver login.4382736d0fcc19a758c7.png",
+    "index.html": "/compass_front/index.html",
+    "main.71d9bc2e.css.map": "/compass_front/static/css/main.71d9bc2e.css.map",
+    "main.e5402f90.js.map": "/compass_front/static/js/main.e5402f90.js.map",
+    "787.1f1706e1.chunk.js.map": "/compass_front/static/js/787.1f1706e1.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.71d9bc2e.css",
+    "static/js/main.e5402f90.js"
+  ]
+}
