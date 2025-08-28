@@ -1,5 +1,6 @@
 import axios from "axios";
 
-export const instance = axios.create({  // axios 공통 설정
-    baseURL: "http://localhost:8080/api"
-})
+export const instance = axios.create({
+    // axios 공통 설정
+    baseURL: "https://3-34-44-250.sslip.io/api",
+});
