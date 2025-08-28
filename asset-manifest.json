@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/compass_front/static/css/main.71d9bc2e.css",
-    "main.js": "/compass_front/static/js/main.964d1337.js",
+    "main.js": "/compass_front/static/js/main.2220a32b.js",
     "static/js/787.1f1706e1.chunk.js": "/compass_front/static/js/787.1f1706e1.chunk.js",
     "static/media/학생.jpg": "/compass_front/static/media/학생.2346f267418417a48923.jpg",
     "static/media/student.png": "/compass_front/static/media/student.902cfed88663195582d4.png",
@@ -16,11 +16,11 @@
     "static/media/naver login.png": "/compass_front/static/media/naver login.4382736d0fcc19a758c7.png",
     "index.html": "/compass_front/index.html",
     "main.71d9bc2e.css.map": "/compass_front/static/css/main.71d9bc2e.css.map",
-    "main.964d1337.js.map": "/compass_front/static/js/main.964d1337.js.map",
+    "main.2220a32b.js.map": "/compass_front/static/js/main.2220a32b.js.map",
     "787.1f1706e1.chunk.js.map": "/compass_front/static/js/787.1f1706e1.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.71d9bc2e.css",
-    "static/js/main.964d1337.js"
+    "static/js/main.2220a32b.js"
   ]
 }
