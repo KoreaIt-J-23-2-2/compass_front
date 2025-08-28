@@ -21,7 +21,7 @@ export const STextContainer = css`
     display: flex;
     justify-content: center;
     flex-direction: column;
-    width: 550px;
+    width: 600px;
     height: 100%;
     font-size: 32px;
     cursor: default;

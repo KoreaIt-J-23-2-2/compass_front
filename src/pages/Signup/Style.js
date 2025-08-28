@@ -25,21 +25,20 @@ export const STitle = css`
 
 export const STitle2 = css`
     color: #8c98a4;
+    margin-bottom: 20px;
 `;
 
-// 일반 로그인
-export const SLoginBox = css`
+// 폼
+export const SForm = css`
     display: flex;
     flex-direction: column;
-    justify-content: center;
     align-items: center;
-    margin: 30px;
 `;
 
 export const SInput = css`
     width: 380px;
     height: 45px;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
     padding: 10px;
     border: 1px solid #dbdbdb;
     border-radius: 5px;
@@ -51,7 +50,7 @@ export const SInput = css`
     }
 `;
 
-export const SLoginBtn = css`
+export const SButton = css`
     width: 380px;
     height: 40px;
     border: none;
@@ -61,24 +60,25 @@ export const SLoginBtn = css`
     font-size: 16px;
     font-weight: bold;
     cursor: pointer;
+    margin-top: 10px;
     &:hover {
         background-color: #125ab2;
     }
 `;
 
-// 회원가입 이동
-export const SSignupBtnBox = css`
+// 로그인 이동
+export const SLoginMove = css`
     margin-top: 15px;
     text-align: center;
 `;
 
-export const SSignupTitle = css`
+export const SLoginTitle = css`
     font-size: 15px;
     color: #8c98a4;
     margin-right: 8px;
 `;
 
-export const SSignupBtn = css`
+export const SLoginBtn = css`
     color: #1976de;
     background: none;
     border: none;
@@ -89,64 +89,38 @@ export const SSignupBtn = css`
     }
 `;
 
-// 소셜 로그인
-export const SDivider = css`
-    display: flex;
-    align-items: center;
-    margin: 30px 0;
+// 기존 SInput은 그대로 두고, 비밀번호 전용 박스/스타일 추가
+
+export const SPasswordBox = css`
+    position: relative;
+    width: 380px;
+    margin-bottom: 15px;
+`;
+
+export const SPasswordInput = css`
     width: 100%;
+    height: 45px;
+    padding: 10px;
+    padding-right: 40px; /* 아이콘 공간 확보 */
+    border: 1px solid #dbdbdb;
+    border-radius: 5px;
     font-size: 14px;
+    &:focus {
+        outline: none;
+        border-color: #1976de;
+        box-shadow: 0 0 5px rgba(25, 118, 222, 0.5);
+    }
+`;
+
+export const SEyeIcon = css`
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    font-size: 18px;
     color: #8c98a4;
-
-    &::before,
-    &::after {
-        content: "";
-        flex: 1;
-        border-bottom: 1px solid #dbdbdb;
+    &:hover {
+        color: #1976de;
     }
-
-    &::before {
-        margin-right: 10px;
-    }
-
-    &::after {
-        margin-left: 10px;
-    }
-`;
-
-export const SSocialLoginBox = css`
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    & img {
-        height: 40px;
-    }
-`;
-
-export const SkakaoLoginBtn = css`
-    display: flex;
-    justify-content: center;
-    border-radius: 5px;
-    background-color: #fee500;
-    width: 180px;
-    cursor: pointer;
-`;
-
-export const SNaverLoginBtn = css`
-    display: flex;
-    justify-content: center;
-    border-radius: 5px;
-    background-color: #03c75a;
-    width: 180px;
-    cursor: pointer;
-`;
-
-// 로고
-export const SMainLogo = css`
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 200px;
-    height: auto;
-    margin-bottom: 10px;
 `;
