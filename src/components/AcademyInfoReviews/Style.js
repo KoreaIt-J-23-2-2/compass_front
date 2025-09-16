@@ -27,7 +27,7 @@ export const SReviewList = css`
     border: 1px solid #dbdbdb;
     padding: 10px;
     background-color: #f7f7f7;
-    grid-template-columns: 100px 60px 520px 80px;
+    grid-template-columns: 100px 60px 520px 85px;
     line-height: 1.2em;
 
     & button {
