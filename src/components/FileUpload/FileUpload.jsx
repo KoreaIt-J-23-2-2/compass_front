@@ -1,10 +1,11 @@
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { auth, storage } from "../../api/firebase/firebase";
 import { BsFillFileEarmarkArrowUpFill } from "react-icons/bs";
 /** @jsxImportSource @emotion/react */
 import * as S from "./Style";
 import { Line } from "rc-progress";
+import { onAuthStateChanged } from "firebase/auth";
 
 function FileUpload({
     academyContent,
