@@ -13,11 +13,12 @@ function Pagination({ totalCount, link, search, viewCount }) {
         const itemsPerPage = viewCount || 5; // viewCount가 없으면 5로 기본 설정
         const lastPage = Math.ceil(totalCount / itemsPerPage);
 
+        const currentPage = parseInt(page, 10) || 1; // useParams에서 넘어오는 page를 숫자로
         const pagesToShow = 5; // 항상 버튼 5개씩
         const startIndex =
-            page % pagesToShow === 0
-                ? page - (pagesToShow - 1)
-                : page - (page % pagesToShow) + 1;
+            currentPage % pagesToShow === 0
+                ? currentPage - (pagesToShow - 1)
+                : currentPage - (currentPage % pagesToShow) + 1;
         const endIndex = Math.min(startIndex + pagesToShow - 1, lastPage);
 
         const pageNumbers = [];

@@ -20,6 +20,8 @@ function FileUpload({
     const [idProgressPercent, setIdProgressPercent] = useState(0);
     const [operationProgressPercent, setOperationProgressPercent] = useState(0);
 
+    const [user, setUser] = useState(null); //로그인 상태 저장
+
     const uploadLabelChange = (e) => {
         const user = auth.currentUser; //업로드 시점에 확인
 
