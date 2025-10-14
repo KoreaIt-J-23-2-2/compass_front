@@ -22,9 +22,21 @@ function FileUpload({
 
     const [user, setUser] = useState(null); //로그인 상태 저장
 
-    const uploadLabelChange = (e) => {
-        const user = auth.currentUser; //업로드 시점에 확인
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+            if (firebaseUser) {
+                console.log("✅ 로그인된 유저:", firebaseUser.uid);
+                setUser(firebaseUser);
+            } else {
+                console.log("❌ 로그인되어 있지 않음");
+                setUser(null);
+            }
+        });
 
+        return () => unsubscribe();
+    }, []);
+
+    const uploadLabelChange = (e) => {
         if (!user) {
             alert("로그인이 필요합니다. 다시 로그인 후 시도해주세요.");
             return;
