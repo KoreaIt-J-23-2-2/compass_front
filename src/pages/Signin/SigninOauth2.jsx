@@ -9,8 +9,13 @@ function SigninOauth2() {
 
     useEffect(() => {
         const token = searchParams.get("token");
-        if (token) {
+        const firebaseToken = searchParams.get("firebaseToken");
+
+        if (token && firebaseToken) {
             localStorage.setItem("accessToken", "Bearer " + token);
+            signInWithCustomToken(auth, firebaseToken)
+                .then(() => console.log("Firebase 로그인 성공"))
+                .catch((err) => console.error("Firebase 로그인 실패:", err));
             queryClient.refetchQueries(["getPrincipal"]);
         }
         setDone(true); // 완료 후 리디렉트

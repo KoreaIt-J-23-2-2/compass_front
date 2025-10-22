@@ -7,6 +7,8 @@ import naverlogin from "../../assets/naver_login.png";
 import { useNavigate } from "react-router-dom";
 import { instance } from "../../api/config/instance";
 import { useQueryClient } from "react-query";
+import { auth } from "../../api/firebase/firebase";
+import { signInWithCustomToken } from "firebase/auth";
 
 function Signin() {
     const navigate = useNavigate();
@@ -40,9 +42,15 @@ function Signin() {
 
             const tokenType = data?.tokenType ?? "Bearer";
             const accessToken = data?.accessToken;
-            if (!accessToken) throw new Error("토큰 응답이 없습니다.");
+            const firebaseToken = data?.firebaseToken;
+
+            if (!accessToken || !firebaseToken)
+                throw new Error("토큰 응답이 없습니다.");
 
             localStorage.setItem("accessToken", `${tokenType} ${accessToken}`);
+
+            // Firebase 로그인
+            await signInWithCustomToken(auth, firebaseToken);
 
             alert("로그인 성공!");
             navigate("/");
