@@ -9,6 +9,7 @@ import { instance } from "../../api/config/instance";
 import { useQueryClient } from "react-query";
 import { auth } from "../../api/firebase/firebase";
 import { signInWithCustomToken } from "firebase/auth";
+import { AiOutlineInfoCircle } from "react-icons/ai";
 
 function Signin() {
     const navigate = useNavigate();
