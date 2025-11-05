@@ -1,18 +1,37 @@
-import { css } from '@emotion/react';
+import { css } from "@emotion/react";
 /** @jsxImportSource @emotion/react */
 
 export const SFileUploadContainer = css`
     display: flex;
     flex-direction: column;
-    padding-bottom: 20px;
+
+    span {
+        font-size: 18px;
+    }
 
     & input {
         display: none;
     }
+
+    p {
+        margin-left: 5px;
+        font-size: 14px;
+        color: #4c4c4cff;
+        height: 100%;
+    }
+
+    .fileBox {
+        display: flex;
+        align-items: center;
+        margin: 10px 0;
+    }
+
+    .progress {
+        margin-bottom: 10px;
+    }
 `;
 
 export const SUploadLabel = css`
-    margin: 5px;
     border: 1px solid #dbdbdb;
     border-radius: 20px;
     padding-top: 7px;

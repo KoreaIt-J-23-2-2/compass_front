@@ -1,11 +1,12 @@
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { auth, storage } from "../../api/firebase/firebase";
 import { BsFillFileEarmarkArrowUpFill } from "react-icons/bs";
 /** @jsxImportSource @emotion/react */
 import * as S from "./Style";
 import { Line } from "rc-progress";
-import { onAuthStateChanged } from "firebase/auth";
+import { useQueryClient } from "react-query";
+import { useFirebaseAuth } from "../../hooks/useFirebaseAuth";
 
 function FileUpload({
     academyContent,
@@ -17,29 +18,17 @@ function FileUpload({
     const [idFile, setIdFile] = useState("");
     const [operationRegistrationFile, setOperationRegistrationFile] =
         useState("");
-    const [businessProgressPercent, setBusinessProgressPercent] = useState(0);
-    const [idProgressPercent, setIdProgressPercent] = useState(0);
-    const [operationProgressPercent, setOperationProgressPercent] = useState(0);
+    const [progress, setProgress] = useState({
+        businessRegistrationFile: 0,
+        idFile: 0,
+        operationRegistrationFile: 0,
+    });
 
-    const [user, setUser] = useState(null); //로그인 상태 저장
+    const { firebaseUser, loading } = useFirebaseAuth();
 
-    useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-            if (firebaseUser) {
-                console.log("✅ 로그인된 유저:", firebaseUser.uid);
-                setUser(firebaseUser);
-            } else {
-                console.log("❌ 로그인되어 있지 않음");
-                setUser(null);
-            }
-        });
-
-        return () => unsubscribe();
-    }, []);
-
-    const uploadLabelChange = (e) => {
-        if (!user) {
-            alert("로그인이 필요합니다. 다시 로그인 후 시도해주세요.");
+    const uploadLabelChange = async (e) => {
+        if (!firebaseUser) {
+            alert("Firebase 인증 세션이 만료되었습니다. 다시 로그인해주세요.");
             return;
         }
 
@@ -50,9 +39,8 @@ function FileUpload({
             return;
         }
 
-        switch (
-            e.target.name //화면에 보여주기 위함(label)
-        ) {
+        //화면에 보여주기 위함(label)
+        switch (e.target.name) {
             case "businessRegistrationFile":
                 setBusinessRegistrationFile(e.target.value);
                 break;
@@ -64,84 +52,102 @@ function FileUpload({
                 break;
         }
 
-        //firebase에 저장
-        const storageRef = ref(
-            storage,
-            `files/${e.target.name}/${academyContent.academyId}/${files[0].name}`
-        ); // 해당 파일의 이름으로 firebase의 storage에 저장됨
-        const uploadTask = uploadBytesResumable(storageRef, files[0]); // 파일 업로드가 실행됨
+        // Firebase Auth 상태 확인
+        const user = auth.currentUser;
+        if (!user) {
+            alert("Firebase 인증 세션이 만료되었습니다. 다시 로그인해주세요.");
+            return;
+        }
 
-        uploadTask.on(
-            //업로드가 시작되면
-            "state_changed", //파일이 변경되고 있을 때
-            (snapshot) => {
-                //파일 업로드 대기 중 프로그레스 바 적용할 때 사용
-                // 증가하는 %가 들어있음
-                switch (e.target.name) {
-                    case "businessRegistrationFile":
-                        setBusinessProgressPercent(
-                            Math.round(
-                                (snapshot.bytesTransferred /
-                                    snapshot.totalBytes) *
-                                    100
-                            )
+        // 🔹 파일 업로드
+        const uploadPromises = files.map((file) => {
+            return new Promise((resolve, reject) => {
+                const customFileName = academyContent?.academyId;
+                const storageRef = ref(
+                    storage,
+                    `files/${e.target.name}/${customFileName}`
+                );
+
+                // 👇👇👇 파일 다운로드를 위해 Content-Disposition을 'attachment'로 설정하는 메타데이터 추가
+                const metadata = {
+                    // 이 파일이 브라우저에서 '첨부 파일'로 처리되어 다운로드되도록 강제
+                    contentDisposition: "attachment",
+                    contentType: file.type,
+                    customMetadata: {
+                        originalExtension: file.name.split(".").pop(),
+                    },
+                };
+
+                // 업로드 작업 생성
+                const uploadTask = uploadBytesResumable(
+                    storageRef,
+                    file,
+                    metadata
+                );
+
+                uploadTask.on(
+                    //업로드가 시작되면
+                    "state_changed", //파일이 변경되고 있을 때
+                    (snapshot) => {
+                        //파일 업로드 대기 중 프로그레스 바 적용할 때 사용, 증가하는 %가 들어있음
+                        const progressValue = Math.round(
+                            (snapshot.bytesTransferred / snapshot.totalBytes) *
+                                100
                         );
-                        break;
-                    case "idFile":
-                        setIdProgressPercent(
-                            Math.round(
-                                (snapshot.bytesTransferred /
-                                    snapshot.totalBytes) *
-                                    100
-                            )
-                        );
-                        break;
-                    case "operationRegistrationFile":
-                        setOperationProgressPercent(
-                            Math.round(
-                                (snapshot.bytesTransferred /
-                                    snapshot.totalBytes) *
-                                    100
-                            )
-                        );
-                        break;
-                }
-            },
-            (error) => {
-                //업로드 실패할 경우
-                console.error(error);
-            },
-            () => {
-                //업로드가 완료되었을 경우
-                getDownloadURL(storageRef)
-                    .then((downloadUrl) => {
-                        //방금전 성공한 업로드 경로를 가져옴
-                        setAcademyContent({
-                            ...academyContent,
-                            [e.target.name]: downloadUrl,
-                        });
-                    })
-                    .then(
-                        setUploadeFile({
-                            ...uploadeFile,
-                            [e.target.name]: 1,
-                        })
-                    );
-            }
-        );
+
+                        // 파일 이름 기준으로 진행률 업데이트
+                        setProgress((prev) => ({
+                            ...prev,
+                            [e.target.name]: progressValue,
+                        }));
+                    },
+                    (error) => {
+                        console.error(error);
+                        reject(error);
+                    },
+                    async () => {
+                        //업로드가 완료 -> 다운로드 URL 가져오기
+                        try {
+                            const downloadUrl = await getDownloadURL(
+                                uploadTask.snapshot.ref
+                            );
+                            setAcademyContent((prev) => ({
+                                ...prev,
+                                [e.target.name]: downloadUrl,
+                            }));
+                            setUploadeFile({
+                                ...uploadeFile,
+                                [e.target.name]: 1,
+                            });
+                            resolve(downloadUrl);
+                        } catch (error) {
+                            console.error("URL 가져오기 실패:", error);
+                            reject(error);
+                        }
+                    }
+                );
+            });
+        });
+
+        try {
+            await Promise.all(uploadPromises);
+            console.log("모든 파일 업로드 성공 ✅");
+        } catch (error) {
+            console.error("업로드 도중 오류 발생 ❌", error);
+        }
     };
 
     const uploadExceptionHandler = (e) => {
         switch (e.target.htmlFor) {
             case "idFile":
-                if (!uploadeFile.businessRegistrationFile) {
+                if (!uploadeFile?.businessRegistrationFile) {
                     alert(
                         "사업자등록증 또는 사업자등록등명원를 먼저 제출하세요."
                     );
                 }
                 break;
             case "operationRegistrationFile":
-                if (!uploadeFile.idFile) {
+                if (!uploadeFile?.idFile) {
                     alert("대표자 신분증을 먼저 제출하세요.");
                 }
                 break;
@@ -152,63 +158,74 @@ function FileUpload({
         <>
             <div css={S.SFileUploadContainer}>
                 <span>사업자등록증 또는 사업자등록등명원 (택 1)</span>
-                <label css={S.SUploadLabel} htmlFor="businessRegistrationFile">
-                    <BsFillFileEarmarkArrowUpFill size={14} /> 첨부하기
-                </label>
-                <p>{businessRegistrationFile}</p>
+                <div className="fileBox">
+                    <label
+                        css={S.SUploadLabel}
+                        htmlFor="businessRegistrationFile"
+                    >
+                        <BsFillFileEarmarkArrowUpFill size={14} /> 첨부하기
+                    </label>
+                    <p>{businessRegistrationFile}</p>
+                </div>
                 <input
                     type="file"
                     name="businessRegistrationFile"
                     id="businessRegistrationFile"
                     onChange={uploadLabelChange}
                 />
-                {businessProgressPercent != 0 &&
-                    businessProgressPercent != 100 && (
+                {progress?.businessRegistrationFile > 0 &&
+                    progress?.businessRegistrationFile < 100 && (
                         <Line
-                            percent={businessProgressPercent}
-                            strokeWidth={2}
+                            percent={progress?.businessRegistrationFile}
+                            strokeWidth={1}
                             strokeColor="#ffe600"
                             trailColor="#D3D3D3"
+                            className="progress"
                         />
                     )}
             </div>
             <div css={S.SFileUploadContainer}>
                 <span>대표자 신분증</span>
-                <label
-                    css={S.SUploadLabel}
-                    htmlFor="idFile"
-                    onClick={uploadExceptionHandler}
-                >
-                    <BsFillFileEarmarkArrowUpFill size={14} /> 첨부하기
-                </label>
-                <p>{idFile}</p>
+                <div className="fileBox">
+                    <label
+                        css={S.SUploadLabel}
+                        htmlFor="idFile"
+                        onClick={uploadExceptionHandler}
+                    >
+                        <BsFillFileEarmarkArrowUpFill size={14} /> 첨부하기
+                    </label>
+                    <p>{idFile}</p>
+                </div>
                 <input
                     type="file"
                     name="idFile"
                     id="idFile"
                     onChange={uploadLabelChange}
-                    disabled={uploadeFile.businessRegistrationFile !== 1}
+                    disabled={uploadeFile?.businessRegistrationFile !== 1}
                 />
-                {idProgressPercent != 0 && idProgressPercent != 100 && (
+                {progress?.idFile > 0 && progress?.idFile < 100 && (
                     <Line
-                        percent={idProgressPercent}
-                        strokeWidth={2}
+                        percent={progress?.idFile}
+                        strokeWidth={1}
                         strokeColor="#ffe600"
                         trailColor="#D3D3D3"
+                        className="progress"
                     />
                 )}
             </div>
-            {academyContent.match === "false" ? (
+            {academyContent?.match === "false" ? (
                 <div css={S.SFileUploadContainer}>
                     <span>학원설립운영등록증</span>
-                    <label
-                        css={S.SUploadLabel}
-                        htmlFor="operationRegistrationFile"
-                        onClick={uploadExceptionHandler}
-                    >
-                        <BsFillFileEarmarkArrowUpFill size={14} /> 첨부하기
-                    </label>
-                    <p>{operationRegistrationFile}</p>
+                    <div className="fileBox">
+                        <label
+                            css={S.SUploadLabel}
+                            htmlFor="operationRegistrationFile"
+                            onClick={uploadExceptionHandler}
+                        >
+                            <BsFillFileEarmarkArrowUpFill size={14} /> 첨부하기
+                        </label>
+                        <p>{operationRegistrationFile}</p>
+                    </div>
                     <input
                         type="file"
                         name="operationRegistrationFile"
@@ -216,13 +233,14 @@ function FileUpload({
                         onChange={uploadLabelChange}
                         disabled={uploadeFile.idFile !== 1}
                     />
-                    {operationProgressPercent != 0 &&
-                        operationProgressPercent != 100 && (
+                    {progress?.operationRegistrationFile > 0 &&
+                        progress?.operationRegistrationFile < 100 && (
                             <Line
-                                percent={operationProgressPercent}
-                                strokeWidth={2}
+                                percent={progress?.operationRegistrationFile}
+                                strokeWidth={1}
                                 strokeColor="#ffe600"
                                 trailColor="#D3D3D3"
+                                className="progress"
                             />
                         )}
                 </div>

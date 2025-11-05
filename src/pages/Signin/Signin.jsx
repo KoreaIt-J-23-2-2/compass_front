@@ -50,7 +50,11 @@ function Signin() {
             localStorage.setItem("accessToken", `${tokenType} ${accessToken}`);
 
             // Firebase 로그인
-            await signInWithCustomToken(auth, firebaseToken);
+            try {
+                await signInWithCustomToken(auth, firebaseToken);
+            } catch (e) {
+                console.error("firebase 로그인 실패", e);
+            }
 
             alert("로그인 성공!");
             navigate("/");
@@ -76,7 +80,16 @@ function Signin() {
         <RootContainer>
             <div css={S.SLayout}>
                 <div css={S.SContainer}>
-                    <h1 css={S.STitle}>로그인</h1>
+                    <div css={S.STitleRow}>
+                        <h1 css={S.STitle}>로그인</h1>
+                        <span css={S.STestTooltipWrapper}>
+                            <AiOutlineInfoCircle /> 관리자 계정으로 테스트
+                            <div css={S.STestTooltip}>
+                                <p>email: test@naver.com</p>
+                                <p>password: Test1234!!</p>
+                            </div>
+                        </span>
+                    </div>
                     <h2 css={S.STitle2}>학습 나침반의 가치를 느껴보세요.</h2>
 
                     <div css={S.SLoginBox}>
