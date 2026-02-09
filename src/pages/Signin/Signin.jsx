@@ -70,11 +70,11 @@ function Signin() {
     // 소셜 로그인 (로컬 백엔드 기준)
     const handleKaKaoLogin = () => {
         window.location.href =
-            "https://3-34-44-250.sslip.io/oauth2/authorization/kakao";
+            "https://3-34-152-149.sslip.io/oauth2/authorization/kakao";
     };
     const handleNaverLogin = () => {
         window.location.href =
-            "https://3-34-44-250.sslip.io/oauth2/authorization/naver";
+            "https://3-34-152-149.sslip.io/oauth2/authorization/naver";
     };
 
     return (

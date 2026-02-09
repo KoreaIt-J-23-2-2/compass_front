@@ -15,6 +15,7 @@ function FindEducationOffice({ educationOfficeCode }) {
 
     // 무한 스크롤을 위한 마지막 학원 요소의 ref , ref가 객체선택 QeurySelect랑 비슷한 개념
     const lastAcademyRef = useRef();
+    const scrollContainerRef = useRef(null); // 스크롤 컨테이너의 ref
 
     // 현재 페이지 번호를 관리하는 상태 변수
     const [page, setPage] = useState(1);
@@ -30,28 +31,43 @@ function FindEducationOffice({ educationOfficeCode }) {
         useRecoilState(selectedAcademyState);
 
     useEffect(() => {
-        return () => {
-            setSelectedAcademy([]);
-        };
+        return () => setSelectedAcademy([]);
     }, []);
 
     // Intersection Observer를 이용하여 무한 스크롤을 감지하는 useEffect
     useEffect(() => {
-        // 감지 event handler
-        const observerService = (entries, observer) => {
+        // scrollContainerRef.current나 lastAcademyRef.current가 없으면 옵저버를 생성할 수 없음.
+        if (!lastAcademyRef.current || !scrollContainerRef.current) {
+            return;
+        }
+
+        const observerService = (entries) => {
             entries.forEach((entry) => {
                 if (entry.isIntersecting) {
-                    getAcademies.refetch(); // 학원 정보를 다시 불러옴
+                    getAcademies?.refetch(); // 학원 정보를 다시 불러옴
+                    // 이 부분이 실행되어야 page가 증가하고 refetch가 발생
                 }
             });
         };
 
         // Intersection Observer 생성 및 마지막 학원 요소 관찰
         const observer = new IntersectionObserver(observerService, {
-            threshold: 1,
+            root: scrollContainerRef.current,
+            rootMargin: "0px",
+            threshold: 0.1,
         });
+
         observer.observe(lastAcademyRef.current);
-    }, []);
+
+        return () => {
+            if (observer) observer.disconnect();
+        };
+    }, [
+        scrollContainerRef.current,
+        lastAcademyRef.current,
+        academyNameInput,
+        educationOfficeCode,
+    ]); // 의존성 배열 추가
 
     // React Query를 사용하여 학원 정보를 가져오는 쿼리 설정
     const getAcademies = useQuery(
@@ -137,7 +153,7 @@ function FindEducationOffice({ educationOfficeCode }) {
                 </div>
                 <SearchBtn onClick={handleSearchClick} />
             </div>
-            <ul css={S.SBodyContainer}>
+            <ul css={S.SBodyContainer} ref={scrollContainerRef}>
                 <li css={S.SList}>
                     <div>학원번호</div>
                     <div>행정구</div>
