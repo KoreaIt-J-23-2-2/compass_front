@@ -5454,16 +5454,11 @@ public interface InpuiryMapper {
 ### **웹 관리자 마이페이지**
 <details>
 <summary>학원 등록 대기목록</summary>
-
 <br/>
 
 승인 대기 중인 학원들을 모아 웹 관리자가 승인/승인 거부 할 수 있도록 만든 페이지
 
-<br/>
-
----
-
-<br/>
+***
 
 ### **Front End**
 
