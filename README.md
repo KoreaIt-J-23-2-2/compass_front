@@ -33,6 +33,8 @@
 - 프로젝트 목적
   - 학원을 알아보는 사람들이 지역, 과목, 수준 등 다양한 요건을 기반으로 학원을 검색하여 정보를 찾을 수 있도록 하는 플랫폼을 제공
 
+- 바로 가기: https://koreait-j-23-2-2.github.io/compass_front
+
 - 제작 기간
   - 2023.10.25 ~ 2023.11.29
 
@@ -2094,7 +2096,189 @@ public interface AdvertisementMapper {
 <details>
 <summary>학원 등록 코드 리뷰</summary>
 <div markdown="1">
-  학원 등록
+  
+  ### Front-End
+  ```html
+  {selectedAcademy.length != 0 && (
+    <>
+      <FileUpload
+        academyContent={academyContent}
+        setAcademyContent={setAcademyContent}
+        uploadeFile={uploadeFile}
+        setUploadeFile={setUploadeFile}
+      />
+      <button onClick={handlesubmissionClick}>제출</button>
+    </>
+  )}
+  ```
+  ```javascript
+  const handlesubmissionClick = async () => {
+    if (uploadeFile.idFile) {
+      if (
+        matchOption === 'false' &&
+        uploadeFile.operationRegistrationFile === 0
+      ) {
+        alert("아직 업로드 중입니다!");
+        return;
+      }
+      await instance.post("/academy", academyContent, option);
+    }
+  };
+  ```
+  - 학원 등록은 입력 순서와 조건이 중요한 프로세스이기 때문에, 단순한 제출 버튼 검증이 아니라 UI 구조와 검증 로직을 함께 설계
+  - 학원 선택 전에는 서류 업로드 UI, 제출 버튼 자체가 렌더링되지 않음
+  - 제출 시에도 필수 파일 업로드 여부, 조건(match 여부)에 따른 추가 서류 업로드 여부를 다시 한 번 검증
+  - 이를 통해 필수 입력이 완료되지 않은 상태에서는 서버 요청 자체가 발생하지 않도록 구조적으로 차단
+
+#### (교육청에 등록된) 학원 검색
+```javascript
+const lastAcademyRef = useRef();
+const scrollContainerRef = useRef(null);
+
+useEffect(() => {
+  if (!lastAcademyRef.current || !scrollContainerRef.current) return;
+
+  const observer = new IntersectionObserver(
+    ([entry]) => {
+      if (entry.isIntersecting) {
+        getAcademies.refetch();
+      }
+    },
+    {
+      root: scrollContainerRef.current,
+      threshold: 0.1,
+    }
+  );
+
+  observer.observe(lastAcademyRef.current);
+
+  return () => observer.disconnect();
+}, [academyNameInput, educationOfficeCode]);
+```
+- 학원 검색 결과는 스크롤 영역 내부에서만 무한 스크롤이 동작하도록 설계
+- 스크롤 이벤트를 직접 처리하지 않고 IntersectionObserver를 사용해 목록의 마지막 요소가 노출되는 시점을 기준으로 다음 페이지를 요청
+
+#### 파일 업로드
+```javascript
+const uploadTask = uploadBytesResumable(storageRef, file, metadata);
+
+uploadTask.on(
+  "state_changed",
+  (snapshot) => {
+    const progressValue = Math.round(
+      (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+    );
+    setProgress((prev) => ({ ...prev, [e.target.name]: progressValue }));
+  },
+  (error) => reject(error),
+  async () => {
+    const downloadUrl = await getDownloadURL(uploadTask.snapshot.ref);
+
+    setAcademyContent((prev) => ({
+      ...prev,
+      [e.target.name]: downloadUrl,
+    }));
+
+    setUploadeFile((prev) => ({
+      ...prev,
+      [e.target.name]: 1,
+    }));
+  }
+);
+```
+- 업로드는 비동기이기 때문에 “업로드 완료” 시점에만 제출 데이터를 확정하도록 설계
+- Firebase Storage의 uploadBytesResumable을 사용해 업로드 진행률을 관리
+- 업로드가 완료된 시점에만 다운로드 URL을 생성하여 제출 데이터에 반영
+
+```javascript
+setAcademyContent((prev) => ({
+  ...prev,
+  [e.target.name]: downloadUrl, // 실제 서버 전송 값
+}));
+
+setUploadeFile((prev) => ({
+  ...prev,
+  [e.target.name]: 1, // 업로드 완료 여부(제출 가능 판단용)
+}));
+```
+- 업로드 결과값(다운로드 URL)과 업로드 완료 여부는 역할이 다르기 때문에 상태를 분리
+- academyContent: 서버로 전달되는 실제 제출 데이터만 관리
+- uploadeFile: 업로드 완료 여부를 판단하는 용도로 사용
+- FileUpload는 업로드의 진행과 완료만 책임지고, 상위 컴포넌트는 그 결과를 기반으로 제출 흐름을 제어
+
+***
+### Back-End
+```java
+@Transactional(rollbackFor = Exception.class)
+public boolean academyRegist(AcademyRegistrationReqDto dto) {
+    AcademyRegistration academyRegistration = dto.toAcademyRegist();
+
+    int errorCode = academyMapper.academyDuplicate(academyRegistration.getAcademyId());
+    if(errorCode > 0) {
+        throw new AcademyException("이미 등록된 학원입니다.");
+    }
+    return academyMapper.academyRegist(academyRegistration) > 0;
+}
+```
+- 학원 등록은 도메인 규칙상 중복이 불가하므로, 서비스 계층에서 명시적으로 중복 여부를 검증
+- 등록 요청 시 기존 학원 등록 여부를 사전에 확인
+- 중복일 경우 도메인 예외(AcademyException)를 발생시켜 흐름을 중단, 정상 케이스에만 실제 등록 로직 수행
+
+```sql
+  <choose>
+      <when test='operationRegistrationFile==null or operationRegistrationFile.equals("")'>
+          null,
+      </when>
+      <otherwise>
+          #{operationRegistrationFile},
+      </otherwise>
+  </choose>
+```
+- 비즈니스 조건에 따라 선택적으로 들어오는 값에 대해 DB 저장 시점에서 null 처리를 명시적으로 관리
+
+#### Firebase에 파일 저장
+```java
+@PostConstruct
+@PostConstruct
+public void initialize() throws Exception {
+    String firebaseBase64 = System.getenv("FIREBASE_CONFIG");
+
+    byte[] decodedBytes = Base64.getDecoder().decode(firebaseBase64);
+    InputStream serviceAccount = new ByteArrayInputStream(decodedBytes);
+
+    FirebaseOptions options = FirebaseOptions.builder()
+        .setStorageBucket(bucketName)
+        .setCredentials(GoogleCredentials.fromStream(serviceAccount))
+        .build();
+
+    if (FirebaseApp.getApps().isEmpty()) {
+        FirebaseApp.initializeApp(options);
+    }
+}
+```
+- Firebase 서비스 계정 키를 Base64로 인코딩해 환경변수로 관리
+- 애플리케이션 시작 시 Firebase Admin SDK를 초기화
+- 소스 코드에 인증 정보를 포함하지 않아 보안 및 배포 환경 관리 용이
+
+```java
+public String createCustomToken(String firebaseUid) {
+    return FirebaseAuth.getInstance().createCustomToken(firebaseUid);
+}
+```
+- Spring 서버가 Firebase Admin 권한으로 Custom Token 생성
+- 클라이언트가 직접 Firebase 인증 정보를 다루지 않도록 설계
+
+```java
+String accessToken = jwtProvider.generateAccessToken(user);
+String refreshToken = jwtProvider.generateRefreshToken(user);
+
+String firebaseUid = "user_" + user.getUserId();
+String firebaseToken = firebaseService.createCustomToken(firebaseUid);
+```
+- 로그인 성공 시 항상 Firebase Custom Token을 함께 발급
+- 프론트엔드는 JWT로 서버 API를 호출하고, Firebase Token으로는 파일 업로드와 같은 Firebase 기능만 수행
+
+
 </div>
 </details>
 
@@ -2105,7 +2289,160 @@ public interface AdvertisementMapper {
 <details>
 <summary>학원 상세페이지 코드 리뷰</summary>
 <div markdown="1">
-  학원 상세페이지
+  
+### Front-End
+```javascript
+const [isHeaderFixed, setIsHeaderFixed] = useState(false);
+
+useEffect(() => {
+  const handleScroll = () => {
+    setIsHeaderFixed(window.scrollY > 200);
+  };
+  window.addEventListener('scroll', handleScroll);
+  return () => window.removeEventListener('scroll', handleScroll);
+}, []);
+```
+```html
+<div css={S.SMoveBar(isHeaderFixed)}>
+  <a href="#introduction">학원소개</a>
+  <a href="#convenience">시설 및 편의 사항</a>
+  <a href="#review">수강후기</a>
+  <a href="#classinfo">학원 수업 정보</a>
+</div>
+```
+- 사용자가 원하는 섹션으로 빠르게 이동할 수 있도록, 스크롤 위치에 따라 고정되는 내비게이션과 앵커 이동 구조를 설계
+- 스크롤이 일정 지점을 넘으면 내비게이션을 fixed 상태로 전환, 메뉴 클릭 시 해당 섹션으로 즉시 이동
+
+```html
+{!!academyData?.academyInfo?.logoImg ? (
+  <img src={academyData.academyInfo.logoImg} />
+) : (
+  <div css={[S.SAcademtLogo, { backgroundColor: color }]}>
+    <span>
+      {academyData.academy.ACA_NM
+        .replace(/\([^)]*\)/g, '')
+        .match(/[ㄱ-ㅎ가-힣]/g)
+        ?.slice(0, 2)
+        .join('')}
+    </span>
+  </div>
+)}
+```
+```javscript
+const getRandomColor = () => {
+  const randomColor = `rgb(${Math.floor(Math.random()*127+128)}, ...)`;
+  setColor(randomColor);
+};
+```
+- 학원 로고가 없는 경우에도 상세 페이지의 브랜드 영역이 비지 않도록, 이미지 유무와 관계없이 일관된 UI를 제공
+- 로고가 없는 경우 학원명에서 한글 두 글자를 추출해 아바타로 표시
+- 랜덤한 파스텔 계열 배경색을 적용해 시각적 구분 제공
+
+#### 수강 후기
+```javascript
+const [modifyButtonState, setModifyButtonState] = useState(false);
+
+const reviewModifyButton = () => {
+  setModifyButtonState(true);
+  setReviewWriteData(getReview.data.data.review);
+};
+
+if (modifyButtonState) {
+  await instance.put(`/review`, reviewWriteData);
+} else {
+  await instance.post("/review", reviewWriteData);
+}
+```
+- 후기 작성과 수정 UI를 분리하지 않고, 하나의 입력 폼에서 상태에 따라 동작을 분기해UI 중복과 상태 복잡도를 감소
+- modifyButtonState로 작성/수정 모드를 명확히 구분
+- 수정 시 기존 후기 데이터를 입력 폼에 프리필, 동일한 입력 UI를 재사용해 관리 포인트 최소화
+```js
+const getReview = useQuery(["getReview", modifyButtonState], async () => {
+  return await instance.get(`/review/${academyId}/${userId}`);
+});
+```
+- 리뷰 목록과 “내가 작성한 후기”는 목적이 다르기 때문에, 수정 기능을 안정적으로 지원하기 위해 단건 조회 API를 분리
+- 내 후기 조회 결과를 수정 모드 진입 시 입력 폼에 바로 적용
+- 목록 데이터 구조에 의존하지 않고 수정 기능 구현 가능
+```js
+const reviewSectionRef = useRef(null);
+const [initialRender, setInitialRender] = useState(true);
+
+useEffect(() => {
+  if (!initialRender && reviewSectionRef.current) {
+    reviewSectionRef.current.scrollIntoView({ behavior: 'auto' });
+  }
+  setInitialRender(false);
+}, [page]);
+```
+- 후기 페이지 변경 시 후기 섹션으로 자동 스크롤
+- 최초 렌더링과 페이지 이동을 구분해 불필요한 스크롤 방지
+
+```js
+if (principal.data && principal.data.data.enabled) {
+  ... // 작성 가능
+  } else if (principal.data && principal.data.data.roleId === 0){
+      alert("관리자는 후기를 작성할 수 없습니다.")
+  } else if (!principal || !principal.data || principal.data.data.userId === 0){
+      alert("로그인 후 이용해주세요.")
+      navigate("/auth/signin")
+  } else {
+      alert("이메일 인증 후 이용해주세요.");
+      navigate("/account/mypage/user")
+      return;
+  }
+```
+- 비로그인 / 관리자 / 이메일 미인증 사용자에 따라 작성 제한
+
+#### 학원 문의
+```js
+const isAcademyAdminRegistered = useQuery(["isAcademyAdminRegistered"], ...,
+  { onSuccess: res => setIsAcademyRegistered(res.data) }
+);
+
+<button css={S.SinquiryButton(isAcademyRegistered)} ...>문의</button>
+```
+- 학원 등록 여부 조회 후 isAcademyRegistered 상태로 저장(관리자가 등록되어 있지 않으면 문의 불가능)
+- 해당 값으로 문의 버튼 스타일/표현을 분기하여 상태를 시각화
+***
+### Back-End
+```java
+public AcademyInfoRespDto getAcademy(int ACADEMY_ID) {
+    Academy academy = academyMapper.getAcademy(ACADEMY_ID);
+    AcademyInfo academyInfo  = academyMapper.getAcademyInfo(ACADEMY_ID);
+    List<Convenience> convenienceInfo = academyMapper.getConvenience(ACADEMY_ID);
+    List<Age> ageRange = academyMapper.getAgeRange(ACADEMY_ID);
+    List<ClassInfo> classInfo = academyMapper.getClassInfo(ACADEMY_ID);
+    return new AcademyInfoRespDto(academy, academyInfo, convenienceInfo, ageRange, classInfo);
+}
+```
+- 상세페이지 렌더링에 필요한 정보를 프론트가 여러 번 호출하지 않도록, 서비스 계층에서 필요한 정보를 조합해 단일 응답 DTO로 제공
+- 학원 기본 정보 + 상세 정보 + 편의시설 + 수강연령 + 수업 정보를 조회
+- 조회 결과를 AcademyInfoRespDto로 묶어 단일 응답으로 반환
+
+```java
+public ReviewListRespDto getAcademyReviews(int academyId, int page) {
+    int index = (page - 1) * 5;
+    return new ReviewListRespDto(
+        academyMapper.getAcademyReviews(academyId, index),
+        academyMapper.getAcademyReviewCount(academyId)
+    );
+}
+```
+- 리뷰: 데이터가 누적되는 영역이므로 페이지 단위 조회
+- 프론트 페이지네이션 UI를 위해 리스트와 총 개수 정보를 함께 제공
+```java
+public boolean writeReview(ReviewReqDto reviewReqDto) {
+    Review review = reviewReqDto.toReview();
+    int errorCode = academyMapper.reviewDuplicate(review);
+    if(errorCode > 0) {
+        throw new ReviewException("후기작성은 한 번만 가능합니다...");
+    }
+    return academyMapper.writeReview(review) > 0;
+}
+```
+- 후기는 서비스 정책상 사용자당 1회만 작성 가능하므로 작성 요청 시 중복 여부를 먼저 확인
+- 정상 케이스에서만 저장 수행, 중복이면 ReviewException으로 차단
 </div>
 </details>
 
@@ -3554,6 +3891,72 @@ updateAnswerChecked는 answer_checked를 무조건 0으로 바꾼다
   
 <details>
 <summary>작성한 후기</summary>
+<div markdown="1">
+
+### Front-End
+```js
+const [selectedReview, setSelectedReview] = useState();
+const [selectedTarget, setSelectedTarget] = useState();
+const [isSelected, setIsSelected] = useState(false);
+
+const reviewOnClick = (e, data) => {
+  setSelectedReview(prev => (prev === data ? null : data));
+
+  if (selectedTarget === e.target) {
+    setIsSelected(prev => !prev);
+    return;
+  }
+  setSelectedTarget(e.target);
+  setIsSelected(true);
+};
+```
+- 리뷰 목록은 테이블로 한눈에 확인
+- “선택”한 리뷰만 하단 패널에서 상세 확인/삭제/수정 수행
+- 같은 항목을 다시 클릭하면 선택 해제(토글)로 불필요한 화면 이동 제거
+
+```js
+const [changeState, setChanegState] = useState(false);
+
+const reviewContentChange = (e) => {
+  setSelectedReview({ ...selectedReview, [e.target.name]: e.target.value });
+  setChanegState(true);
+};
+
+const reviewScoreChange = (value) => {
+  setSelectedReview({ ...selectedReview, score: parseFloat(value) });
+  setChanegState(true);
+};
+
+const reviewSubmitButton = async () => {
+  if (changeState) {
+    await instance.put(`/review`, selectedReview);
+    setChanegState(false);
+    return getUserReviews.refetch();
+  } else {
+    setModifyButtonState(false);
+  }
+};
+```
+- 수정 모드에서 실제 변경이 없는데도 서버 요청이 나가는 것을 막아, 불필요한 네트워크 요청과 서버 부하를 줄이도록 구성
+- 별점/내용 변경 시에만 changeState=true
+- 변경이 있을 때만 수정 API 호출, 변경이 없으면 수정 모드만 종료하여 UX 단순화
+***
+### Back-End
+- 리뷰 작성/수정/삭제 정책 및 단건 조회 분리 설계는 ‘학원 상세페이지 – 수강후기’ 섹션에서 동일하게 적용
+
+```js
+public ReviewListRespDto getUserReviews(int userId, int page) {
+    int index = (page - 1) * 5;
+    return new ReviewListRespDto(
+        accountMapper.getUserReviews(userId, index),
+        accountMapper.getUserReviewCount(userId)
+    );
+}
+```
+- getUserReviews: 현재 페이지의 후기 목록 조회
+- getUserReviewCount: 전체 후기 개수 조회
+- 두 결과를 ReviewListRespDto로 묶어 프론트에서 Pagination 구성에 바로 활용
+</div>
 </details>
 
 <br/>
